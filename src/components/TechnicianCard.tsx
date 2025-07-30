@@ -33,7 +33,7 @@ export function TechnicianCard({
   onViewProfile 
 }: TechnicianCardProps) {
   return (
-    <Card className="hover:shadow-soft transition-all duration-200">
+    <Card className="hover:shadow-lg transition-all duration-300 rounded-3xl border-0 shadow-sm hover:scale-[1.01]">
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           <Avatar className="w-16 h-16">

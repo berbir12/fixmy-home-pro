@@ -1,10 +1,11 @@
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { ServiceCard } from "@/components/ServiceCard";
-import { Search, MapPin, Star, Clock, Shield, AirVent, WashingMachine, Tv, Wrench } from "lucide-react";
-import heroImage from "@/assets/service-hero.jpg";
+import { Star, Users, Shield, Clock, ArrowRight, Zap, Wrench, Home, Search, MapPin, Smartphone, AirVent, WashingMachine, Tv } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const featuredServices = [
   {
@@ -30,8 +31,9 @@ const featuredServices = [
   }
 ];
 
-const Index = () => {
+export default function Index() {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleServiceSelect = (serviceId: string) => {
     navigate(`/service/${serviceId}`);
@@ -39,204 +41,270 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative bg-hero-gradient text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative container mx-auto px-4 py-20 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6 animate-fade-in">
-              <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                Trusted Home Appliance Services
-              </h1>
-              <p className="text-xl lg:text-2xl text-white/90">
-                Connect with verified technicians for repairs, installations, and maintenance
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  variant="hero" 
-                  size="xl"
-                  onClick={() => navigate("/services")}
-                  className="bg-white text-primary hover:bg-white/90"
-                >
-                  <Search className="w-5 h-5 mr-2" />
-                  Book a Service
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="xl"
-                  className="border-white text-white hover:bg-white hover:text-primary"
-                >
-                  Emergency Service
-                </Button>
+      {/* Header */}
+      <header className="bg-white border-b border-border">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-primary rounded-2xl flex items-center justify-center">
+                <Wrench className="w-5 h-5 text-white" />
               </div>
+              <span className="text-xl font-bold text-primary">FixNow</span>
             </div>
-            <div className="relative animate-slide-up">
-              <img 
-                src={heroImage} 
-                alt="Home appliance services" 
-                className="rounded-2xl shadow-2xl"
-              />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="w-4 h-4" />
+              <span>Current Location</span>
             </div>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Trust Indicators */}
-      <section className="py-16 bg-card">
+      {/* Main Search Section */}
+      <section className="bg-white py-8">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div className="space-y-2">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Shield className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-semibold">Verified Technicians</h3>
-              <p className="text-sm text-muted-foreground">Background checked & certified</p>
-            </div>
-            <div className="space-y-2">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Clock className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-semibold">Same Day Service</h3>
-              <p className="text-sm text-muted-foreground">Quick response & booking</p>
-            </div>
-            <div className="space-y-2">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Star className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-semibold">Rated 4.8/5</h3>
-              <p className="text-sm text-muted-foreground">10,000+ satisfied customers</p>
-            </div>
-            <div className="space-y-2">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <MapPin className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-semibold">Local Experts</h3>
-              <p className="text-sm text-muted-foreground">Technicians in your area</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Services */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Popular Services
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Get expert help for your home appliances
+          <div className="max-w-2xl mx-auto text-center mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              What do you need help with?
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Get expert technicians for repairs, installations & maintenance
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {featuredServices.map((service) => (
-              <ServiceCard
-                key={service.id}
-                icon={service.icon}
-                title={service.title}
-                description={service.description}
-                services={service.services}
-                onClick={() => handleServiceSelect(service.id)}
+
+          {/* Search Bar */}
+          <div className="max-w-lg mx-auto mb-8">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Input
+                placeholder="Search for appliances, services..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 h-14 text-lg rounded-2xl border-2 border-input focus:border-primary shadow-sm"
               />
-            ))}
+            </div>
           </div>
 
-          <div className="text-center">
+          {/* Quick Service Buttons */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
             <Button 
               variant="outline" 
-              size="lg"
+              className="rounded-full"
+              onClick={() => navigate("/services?category=air-conditioning")}
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              AC Repair
+            </Button>
+            <Button 
+              variant="outline" 
+              className="rounded-full"
+              onClick={() => navigate("/services?category=washing-machine")}
+            >
+              Washing Machine
+            </Button>
+            <Button 
+              variant="outline" 
+              className="rounded-full"
+              onClick={() => navigate("/services?category=refrigerator")}
+            >
+              Refrigerator
+            </Button>
+            <Button 
+              variant="outline" 
+              className="rounded-full bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              Emergency
+            </Button>
+          </div>
+
+          {/* Quick Book Button */}
+          <div className="text-center">
+            <Button 
+              size="lg" 
+              className="rounded-2xl px-8 py-6 text-lg font-semibold shadow-lg hover:scale-105 transition-transform"
               onClick={() => navigate("/services")}
             >
-              <Wrench className="w-4 h-4 mr-2" />
-              View All Services
+              <Smartphone className="w-5 h-5 mr-2" />
+              Quick Book Service
             </Button>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-16 bg-muted/30">
+      {/* Live Technician Availability */}
+      <section className="py-12 bg-secondary/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              How It Works
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Book your service in 3 simple steps
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="text-center group hover:shadow-soft transition-all duration-300">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                  <span className="text-2xl font-bold text-primary">1</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Choose Service</h3>
-                <p className="text-muted-foreground">
-                  Select your appliance and type of service needed
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center group hover:shadow-soft transition-all duration-300">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                  <span className="text-2xl font-bold text-primary">2</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Pick Technician</h3>
-                <p className="text-muted-foreground">
-                  Browse profiles and choose your preferred expert
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center group hover:shadow-soft transition-all duration-300">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                  <span className="text-2xl font-bold text-primary">3</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Get It Fixed</h3>
-                <p className="text-muted-foreground">
-                  Schedule appointment and get your appliance working
-                </p>
-              </CardContent>
-            </Card>
+          <div className="bg-white rounded-3xl p-8 shadow-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-foreground">
+                Available Technicians Near You
+              </h2>
+              <Badge variant="secondary" className="bg-accent text-accent-foreground">
+                <div className="w-2 h-2 bg-accent-foreground rounded-full mr-2 animate-pulse"></div>
+                12 Online
+              </Badge>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { name: "John Smith", rating: 4.9, eta: "15 min", specialty: "AC Repair" },
+                { name: "Sarah Johnson", rating: 4.8, eta: "22 min", specialty: "Appliance Install" },
+                { name: "Mike Wilson", rating: 4.7, eta: "28 min", specialty: "Maintenance" }
+              ].map((tech, index) => (
+                <Card key={index} className="border-2 border-transparent hover:border-accent transition-colors cursor-pointer rounded-3xl">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                        <span className="text-primary font-semibold">
+                          {tech.name.split(' ').map(n => n[0]).join('')}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-semibold">{tech.name}</p>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-warning text-warning" />
+                          <span className="text-sm font-medium">{tech.rating}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">{tech.specialty}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-accent font-semibold">ETA: {tech.eta}</span>
+                      <Button size="sm" variant="outline" className="rounded-full">
+                        Book
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-accent-gradient text-white">
+      {/* Service Categories */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Popular Services
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Choose from our most requested appliance services
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredServices.map((service, index) => (
+              <ServiceCard
+                key={index}
+                {...service}
+                onClick={() => handleServiceSelect(service.id)}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Stats */}
+      <section className="py-16 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-primary">500+</div>
+              <p className="text-sm text-muted-foreground">Verified Technicians</p>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-primary">15 min</div>
+              <p className="text-sm text-muted-foreground">Avg Response Time</p>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-primary">4.9★</div>
+              <p className="text-sm text-muted-foreground">Customer Rating</p>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-primary">24/7</div>
+              <p className="text-sm text-muted-foreground">Emergency Service</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - Uber Style */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Book in 3 Simple Steps
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Just like ordering a ride, but for home services
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-white">1</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Request Service</h3>
+                <p className="text-muted-foreground">
+                  Search and select your appliance service
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-white">2</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Get Matched</h3>
+                <p className="text-muted-foreground">
+                  We find available technicians near you
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-white">3</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Track & Pay</h3>
+                <p className="text-muted-foreground">
+                  Live tracking and seamless payment
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Emergency CTA */}
+      <section className="py-16 bg-primary text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">
             Need Emergency Service?
           </h2>
           <p className="text-xl mb-8 text-white/90">
-            24/7 emergency repairs available for urgent issues
+            24/7 emergency repairs available with priority dispatch
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              variant="hero" 
+              variant="secondary" 
               size="xl"
-              className="bg-white text-accent hover:bg-white/90"
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
             >
-              Call Emergency Line
+              Emergency Call
             </Button>
             <Button 
               variant="outline" 
               size="xl"
-              className="border-white text-white hover:bg-white hover:text-accent"
+              className="border-white text-white hover:bg-white hover:text-primary"
               onClick={() => navigate("/services")}
             >
-              Book Regular Service
+              Schedule Service
             </Button>
           </div>
         </div>
       </section>
     </div>
   );
-};
-
-export default Index;
+}
