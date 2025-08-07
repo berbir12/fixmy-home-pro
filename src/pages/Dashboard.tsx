@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +40,16 @@ export default function Dashboard() {
   const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth();
   const { bookings, isLoading: bookingsLoading, cancelBooking, rateBooking } = useBookings();
   const { payments, isLoading: paymentsLoading } = usePayments();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Handle URL parameter for tab
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['overview', 'bookings', 'payments', 'profile'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   // Redirect if not authenticated
   if (!authLoading && !isAuthenticated) {

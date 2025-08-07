@@ -76,7 +76,7 @@ export default function BookingSuccess() {
             Book Another Service
           </Button>
           <Button 
-            onClick={() => navigate("/bookings")} 
+            onClick={() => navigate("/dashboard?tab=bookings")} 
             variant="outline" 
             className="w-full"
             size="lg"
