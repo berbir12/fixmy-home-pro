@@ -15,6 +15,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
 import TechnicianRegistration from "./pages/TechnicianRegistration";
+import AdminDashboard from "./pages/AdminDashboard";
 
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +48,11 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminDashboard />
               </ProtectedRoute>
             } />
             <Route path="/chat" element={

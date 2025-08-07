@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { 
+import {
   ArrowLeft,
   User,
   Mail,
@@ -22,7 +22,6 @@ import {
   DollarSign,
   Car,
   Languages,
-  Skills,
   FileText,
   Upload,
   CheckCircle,
@@ -44,7 +43,7 @@ interface TechnicianFormData {
   experience: string;
   hourlyRate: string;
   specialties: string[];
-  certifications: string[];
+  certificationNames: string[];
   skills: string[];
   languages: string[];
   
@@ -66,7 +65,7 @@ interface TechnicianFormData {
   
   // Documents
   resume: File | null;
-  certifications: File[];
+  certificationFiles: File[];
   references: string;
   
   // Terms
@@ -131,7 +130,7 @@ export default function TechnicianRegistration() {
     experience: "",
     hourlyRate: "",
     specialties: [],
-    certifications: [],
+    certificationNames: [],
     skills: [],
     languages: [],
     hasVehicle: false,
@@ -147,7 +146,7 @@ export default function TechnicianRegistration() {
       sunday: { morning: false, afternoon: false, evening: false }
     },
     resume: null,
-    certifications: [],
+    certificationFiles: [],
     references: "",
     agreeToTerms: false,
     agreeToBackgroundCheck: false
@@ -180,10 +179,10 @@ export default function TechnicianRegistration() {
   };
 
   const handleFileUpload = (field: string, file: File) => {
-    if (field === "certifications") {
+    if (field === "certificationFiles") {
       setFormData(prev => ({
         ...prev,
-        certifications: [...prev.certifications, file]
+        certificationFiles: [...prev.certificationFiles, file]
       }));
     } else {
       setFormData(prev => ({ ...prev, [field]: file }));
@@ -207,17 +206,50 @@ export default function TechnicianRegistration() {
     setIsSubmitting(true);
 
     try {
-      // Here you would submit the technician application
-      // For now, we'll simulate the submission
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Import the API client
+      const { api } = await import('@/lib/api');
       
-      toast({
-        title: "Application Submitted!",
-        description: "Thank you for your interest. We'll review your application and contact you within 3-5 business days.",
+      // Submit the technician application
+      const response = await api.submitTechnicianApplication({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        experience: formData.experience,
+        hourlyRate: parseFloat(formData.hourlyRate),
+        specialties: formData.specialties,
+        certifications: formData.certificationNames,
+        skills: formData.skills,
+        languages: formData.languages,
+        hasVehicle: formData.hasVehicle,
+        vehicleType: formData.vehicleType,
+        vehicleInfo: formData.vehicleInfo,
+        availability: formData.availability,
+        resumeUrl: formData.resume ? URL.createObjectURL(formData.resume) : undefined,
+        certificationFiles: formData.certificationFiles.map(file => ({
+          name: file.name,
+          url: URL.createObjectURL(file)
+        })),
+        references: formData.references,
+        agreeToTerms: formData.agreeToTerms,
+        agreeToBackgroundCheck: formData.agreeToBackgroundCheck
       });
-      
-      navigate('/');
+
+      if (response.success) {
+        toast({
+          title: "Application Submitted!",
+          description: "Thank you for your interest. We'll review your application and contact you within 3-5 business days.",
+        });
+        navigate('/');
+      } else {
+        throw new Error(response.error);
+      }
     } catch (error) {
+      console.error('Application submission error:', error);
       toast({
         title: "Submission Failed",
         description: "There was an error submitting your application. Please try again.",

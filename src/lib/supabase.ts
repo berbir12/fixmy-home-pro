@@ -332,6 +332,104 @@ export interface Database {
           is_online?: boolean
         }
       }
+      technician_applications: {
+        Row: {
+          id: string
+          first_name: string
+          last_name: string
+          email: string
+          phone: string
+          address: string
+          city: string
+          state: string
+          zip_code: string
+          experience: string
+          hourly_rate: number
+          specialties: string[]
+          certifications: string[]
+          skills: string[]
+          languages: string[]
+          has_vehicle: boolean
+          vehicle_type?: string
+          vehicle_info?: string
+          availability: any
+          resume_url?: string
+          certification_files: any[]
+          references_text?: string
+          agree_to_terms: boolean
+          agree_to_background_check: boolean
+          status: 'pending' | 'reviewing' | 'approved' | 'rejected' | 'hired'
+          admin_notes?: string
+          reviewed_by?: string
+          reviewed_at?: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          first_name: string
+          last_name: string
+          email: string
+          phone: string
+          address: string
+          city: string
+          state: string
+          zip_code: string
+          experience: string
+          hourly_rate: number
+          specialties?: string[]
+          certifications?: string[]
+          skills?: string[]
+          languages?: string[]
+          has_vehicle?: boolean
+          vehicle_type?: string
+          vehicle_info?: string
+          availability?: any
+          resume_url?: string
+          certification_files?: any[]
+          references_text?: string
+          agree_to_terms: boolean
+          agree_to_background_check: boolean
+          status?: 'pending' | 'reviewing' | 'approved' | 'rejected' | 'hired'
+          admin_notes?: string
+          reviewed_by?: string
+          reviewed_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          first_name?: string
+          last_name?: string
+          email?: string
+          phone?: string
+          address?: string
+          city?: string
+          state?: string
+          zip_code?: string
+          experience?: string
+          hourly_rate?: number
+          specialties?: string[]
+          certifications?: string[]
+          skills?: string[]
+          languages?: string[]
+          has_vehicle?: boolean
+          vehicle_type?: string
+          vehicle_info?: string
+          availability?: any
+          resume_url?: string
+          certification_files?: any[]
+          references_text?: string
+          agree_to_terms?: boolean
+          agree_to_background_check?: boolean
+          status?: 'pending' | 'reviewing' | 'approved' | 'rejected' | 'hired'
+          admin_notes?: string
+          reviewed_by?: string
+          reviewed_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -532,6 +630,34 @@ export const supabaseHelpers = {
       .from('services')
       .select('*')
       .eq('id', serviceId)
+      .single()
+    return { data, error }
+  },
+
+  // Technician application helpers
+  async submitTechnicianApplication(applicationData: Inserts<'technician_applications'>) {
+    const { data, error } = await supabase
+      .from('technician_applications')
+      .insert([applicationData])
+      .select()
+      .single()
+    return { data, error }
+  },
+
+  async getTechnicianApplications() {
+    const { data, error } = await supabase
+      .from('technician_applications')
+      .select('*')
+      .order('created_at', { ascending: false })
+    return { data, error }
+  },
+
+  async updateTechnicianApplication(applicationId: string, updates: Updates<'technician_applications'>) {
+    const { data, error } = await supabase
+      .from('technician_applications')
+      .update(updates)
+      .eq('id', applicationId)
+      .select()
       .single()
     return { data, error }
   }

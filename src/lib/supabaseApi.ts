@@ -678,4 +678,132 @@ export class SupabaseApiClient {
       ]
     }
   }
+
+  // Technician application methods
+  async submitTechnicianApplication(applicationData: {
+    firstName: string
+    lastName: string
+    email: string
+    phone: string
+    address: string
+    city: string
+    state: string
+    zipCode: string
+    experience: string
+    hourlyRate: number
+    specialties: string[]
+    certifications: string[]
+    skills: string[]
+    languages: string[]
+    hasVehicle: boolean
+    vehicleType?: string
+    vehicleInfo?: string
+    availability: any
+    resumeUrl?: string
+    certificationFiles?: any[]
+    references?: string
+    agreeToTerms: boolean
+    agreeToBackgroundCheck: boolean
+  }): Promise<ApiResponse<any>> {
+    try {
+      const { data, error } = await supabaseHelpers.submitTechnicianApplication({
+        first_name: applicationData.firstName,
+        last_name: applicationData.lastName,
+        email: applicationData.email,
+        phone: applicationData.phone,
+        address: applicationData.address,
+        city: applicationData.city,
+        state: applicationData.state,
+        zip_code: applicationData.zipCode,
+        experience: applicationData.experience,
+        hourly_rate: applicationData.hourlyRate,
+        specialties: applicationData.specialties,
+        certifications: applicationData.certifications,
+        skills: applicationData.skills,
+        languages: applicationData.languages,
+        has_vehicle: applicationData.hasVehicle,
+        vehicle_type: applicationData.vehicleType,
+        vehicle_info: applicationData.vehicleInfo,
+        availability: applicationData.availability,
+        resume_url: applicationData.resumeUrl,
+        certification_files: applicationData.certificationFiles || [],
+        references_text: applicationData.references,
+        agree_to_terms: applicationData.agreeToTerms,
+        agree_to_background_check: applicationData.agreeToBackgroundCheck,
+        status: 'pending'
+      })
+
+      if (error) {
+        return {
+          success: false,
+          error: error.message
+        }
+      }
+
+      return {
+        success: true,
+        data: data
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Failed to submit application'
+      }
+    }
+  }
+
+  async getTechnicianApplications(): Promise<ApiResponse<any[]>> {
+    try {
+      const { data, error } = await supabaseHelpers.getTechnicianApplications()
+
+      if (error) {
+        return {
+          success: false,
+          error: error.message
+        }
+      }
+
+      return {
+        success: true,
+        data: data || []
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Failed to fetch applications'
+      }
+    }
+  }
+
+  async updateTechnicianApplication(applicationId: string, updates: {
+    status?: 'pending' | 'reviewing' | 'approved' | 'rejected' | 'hired'
+    adminNotes?: string
+    reviewedBy?: string
+  }): Promise<ApiResponse<any>> {
+    try {
+      const { data, error } = await supabaseHelpers.updateTechnicianApplication(applicationId, {
+        status: updates.status,
+        admin_notes: updates.adminNotes,
+        reviewed_by: updates.reviewedBy,
+        reviewed_at: updates.status ? new Date().toISOString() : undefined
+      })
+
+      if (error) {
+        return {
+          success: false,
+          error: error.message
+        }
+      }
+
+      return {
+        success: true,
+        data: data
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Failed to update application'
+      }
+    }
+  }
 }
