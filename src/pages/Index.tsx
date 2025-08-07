@@ -86,6 +86,10 @@ export default function Index() {
               <Button variant="secondary" size="sm" onClick={() => navigate("/technician-registration")}>
                 Join as Technician
               </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/admin")}>
+                <Shield className="w-4 h-4 mr-2" />
+                Admin
+              </Button>
             </div>
           </div>
         </div>

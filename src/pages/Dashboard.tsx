@@ -31,7 +31,8 @@ import {
   Download,
   Edit,
   Trash2,
-  LogOut
+  LogOut,
+  Shield
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -100,6 +101,10 @@ export default function Dashboard() {
     });
   };
 
+  const handleAdminDashboard = () => {
+    navigate("/admin");
+  };
+
   const handleCancelBooking = async (bookingId: string) => {
     try {
       await cancelBooking(bookingId);
@@ -153,6 +158,12 @@ export default function Dashboard() {
               <span className="text-xl font-bold text-primary">FixNow</span>
             </div>
             <div className="flex items-center gap-4">
+              {user?.role === 'admin' && (
+                <Button variant="ghost" size="sm" onClick={handleAdminDashboard}>
+                  <Shield className="w-4 h-4 mr-2" />
+                  Admin
+                </Button>
+              )}
               <Button variant="ghost" size="sm" onClick={() => navigate("/chat")}>
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Chat
