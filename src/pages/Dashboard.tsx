@@ -126,7 +126,6 @@ export default function Dashboard() {
   // Calculate stats
   const totalBookings = bookings.length;
   const completedBookings = bookings.filter(b => b.status === 'completed').length;
-  const totalSpent = payments.reduce((sum, p) => sum + p.amount, 0);
   const averageRating = bookings
     .filter(b => b.rating)
     .reduce((sum, b) => sum + (b.rating || 0), 0) / 
@@ -192,7 +191,7 @@ export default function Dashboard() {
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -213,18 +212,6 @@ export default function Dashboard() {
                       <p className="text-2xl font-bold">{completedBookings}</p>
                     </div>
                     <CheckCircle className="w-8 h-8 text-success" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Spent</p>
-                      <p className="text-2xl font-bold">${totalSpent}</p>
-                    </div>
-                    <CreditCard className="w-8 h-8 text-warning" />
                   </div>
                 </CardContent>
               </Card>
