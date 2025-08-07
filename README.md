@@ -15,13 +15,11 @@ TechConnect Portal is a comprehensive full-stack web application serving as the 
 - **Socket.io Client** for real-time features
 
 ### **Backend**
-- **Node.js** + Express.js (development server)
-- **Supabase** (PostgreSQL database + authentication)
+- **Supabase** (PostgreSQL database + authentication + real-time)
 - **JWT** for authentication
-- **bcryptjs** for password hashing
-- **Socket.io** for real-time communication
-- **Stripe** for payment processing
-- **Multer** for file uploads
+- **Row Level Security (RLS)** for data protection
+- **Real-time subscriptions** for live updates
+- **Stripe** for payment processing (planned)
 
 ## 👥 **User Roles & Features**
 
@@ -196,11 +194,6 @@ TechConnect Portal is a comprehensive full-stack web application serving as the 
    ```bash
    # Install frontend dependencies
    npm install
-   
-   # Install backend dependencies
-   cd server
-   npm install
-   cd ..
    ```
 
 3. **Set up Supabase (Recommended)**
@@ -217,24 +210,18 @@ TechConnect Portal is a comprehensive full-stack web application serving as the 
 
 4. **Environment Setup**
    ```bash
-   # Create environment files
+   # Create environment file
    cp .env.example .env
-   cd server && cp .env.example .env
    ```
 
-4. **Start the development servers**
+4. **Start the development server**
    ```bash
-   # Start backend server (in server directory)
-   cd server
-   npm run dev
-   
-   # Start frontend server (in root directory)
+   # Start frontend server
    npm run dev
    ```
 
 5. **Access the application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:3001/api (development server)
+   - Frontend: http://localhost:5173 (or the port shown in terminal)
    - Supabase Dashboard: Your project dashboard
 
 ### **Test Credentials**
@@ -278,10 +265,11 @@ The application uses a PostgreSQL database with the following key tables:
 
 For detailed schema information, see `supabase-schema.sql` and `SUPABASE_SETUP.md`.
 
-### **Development Fallback**
-For development without Supabase, the application can use:
-- **Mock API** with in-memory data
-- **Local Express server** with mock endpoints
+### **Production Ready**
+The application is configured for production deployment:
+- **Vercel** for frontend hosting
+- **Supabase** for backend services and database
+- **Environment variables** configured in Vercel dashboard
 
 ---
 

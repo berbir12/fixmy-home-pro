@@ -16,6 +16,7 @@ export class SupabaseApiClient {
 
   // Auth methods
   async login(email: string, password: string): Promise<ApiResponse<{ user: User; token: string }>> {
+    console.log('🔗 SupabaseApiClient login called with:', { email });
     try {
       const { data, error } = await supabaseHelpers.signIn(email, password)
       
@@ -99,6 +100,7 @@ export class SupabaseApiClient {
 
       // Create user profile
       await supabaseHelpers.createUserProfile(data.user.id, {
+        user_id: data.user.id,
         addresses: [],
         preferences: {
           notifications: { email: true, sms: true, push: true },
