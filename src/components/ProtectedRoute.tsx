@@ -11,7 +11,13 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
-  console.log('🔗 ProtectedRoute:', { isAuthenticated, isLoading, requireAuth, pathname: location.pathname });
+  console.log('🔗 ProtectedRoute:', { 
+    isAuthenticated, 
+    isLoading, 
+    requireAuth, 
+    pathname: location.pathname,
+    timestamp: new Date().toISOString()
+  });
 
   if (isLoading) {
     return (

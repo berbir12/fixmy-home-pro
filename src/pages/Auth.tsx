@@ -40,6 +40,8 @@ export default function Auth() {
     registerError,
     sendOtpError,
     verifyOtpError,
+    isAuthenticated,
+    isLoading,
   } = useAuth();
   
   const [mode, setMode] = useState<AuthMode>("login");
@@ -84,6 +86,7 @@ export default function Auth() {
     }
 
     console.log('🔗 Auth component: Attempting login with:', { email: formData.email });
+    console.log('🔗 Auth component: Current auth state before login:', { isAuthenticated, isLoading });
     login({ email: formData.email, password: formData.password });
   };
 

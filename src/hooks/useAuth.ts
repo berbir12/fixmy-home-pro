@@ -91,11 +91,9 @@ export function useAuth() {
         });
         queryClient.invalidateQueries({ queryKey: ['user'] });
         
-        // Navigate immediately after state update
-        console.log('🔗 Navigating to dashboard immediately');
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 0);
+        // Set navigation flag - will be handled by useEffect after state update
+        console.log('🔗 Setting navigation flag to dashboard');
+        setShouldNavigate('/dashboard');
       } else {
         console.error('🔗 Login failed:', response.error);
       }
