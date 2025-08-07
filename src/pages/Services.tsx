@@ -37,7 +37,7 @@ import {
   Printer,
   Ruler,
   Phone,
-  Drone,
+  Plane,
   Cube,
   Store,
   Activity,
@@ -134,7 +134,7 @@ const serviceCategories = [
     id: "specialized-services",
     title: "Specialized Services",
     description: "Advanced & specialized technical services",
-    icon: <Drone className="w-8 h-8 text-primary" />,
+    icon: <Plane className="w-8 h-8 text-primary" />,
     services: ["Drone Setup & Training", "3D Printing Setup", "Smart Retail Setup", "Fitness Tech Setup", "Educational Tech Setup"]
   },
   // Traditional Home Services

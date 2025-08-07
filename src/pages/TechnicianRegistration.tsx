@@ -84,7 +84,7 @@ export default function TechnicianRegistration() {
     experience: "",
     hourlyRate: "",
     specialties: [] as string[],
-    certifications: [] as string[],
+    certificationNames: [] as string[],
     languages: [] as string[],
     
     // Vehicle Information
@@ -106,7 +106,7 @@ export default function TechnicianRegistration() {
     
     // Documents
     resume: null as File | null,
-    certifications: [] as File[],
+    certificationFiles: [] as File[],
     insurance: null as File | null,
     
     // Terms
@@ -130,9 +130,9 @@ export default function TechnicianRegistration() {
   const handleCertificationToggle = (cert: string) => {
     setFormData(prev => ({
       ...prev,
-      certifications: prev.certifications.includes(cert)
-        ? prev.certifications.filter(c => c !== cert)
-        : [...prev.certifications, cert]
+      certificationNames: prev.certificationNames.includes(cert)
+        ? prev.certificationNames.filter(c => c !== cert)
+        : [...prev.certificationNames, cert]
     }));
   };
 
@@ -158,7 +158,7 @@ export default function TechnicianRegistration() {
     }));
   };
 
-  const handleFileUpload = (field: string, file: File) => {
+  const handleFileUpload = (field: string, file: File | File[]) => {
     setFormData(prev => ({ ...prev, [field]: file }));
   };
 
@@ -326,7 +326,7 @@ export default function TechnicianRegistration() {
             <div key={cert} className="flex items-center space-x-2">
               <Checkbox
                 id={cert}
-                checked={formData.certifications.includes(cert)}
+                checked={formData.certificationNames.includes(cert)}
                 onCheckedChange={() => handleCertificationToggle(cert)}
               />
               <Label htmlFor={cert} className="text-sm">{cert}</Label>
@@ -463,7 +463,7 @@ export default function TechnicianRegistration() {
               multiple
               onChange={(e) => {
                 const files = Array.from(e.target.files || []);
-                handleFileUpload('certifications', files);
+                handleFileUpload('certificationFiles', files);
               }}
             />
           </div>
