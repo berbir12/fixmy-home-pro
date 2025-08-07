@@ -15,8 +15,19 @@ export function useAuth() {
     isAuthenticated: false,
     isLoading: true,
   });
+  const [shouldNavigate, setShouldNavigate] = useState<string | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Handle navigation after state updates
+  useEffect(() => {
+    console.log('🔗 Effect: shouldNavigate changed to', shouldNavigate);
+    if (shouldNavigate) {
+      console.log('🔗 Effect: Navigating to', shouldNavigate);
+      navigate(shouldNavigate);
+      setShouldNavigate(null);
+    }
+  }, [shouldNavigate, navigate]);
 
   // Check if user is authenticated on mount
   useEffect(() => {
@@ -58,6 +69,11 @@ export function useAuth() {
     }
   }, []);
 
+  // Debug auth state changes
+  useEffect(() => {
+    console.log('🔗 Auth state changed:', authState);
+  }, [authState]);
+
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => {
@@ -75,12 +91,11 @@ export function useAuth() {
         });
         queryClient.invalidateQueries({ queryKey: ['user'] });
         
-        // Add a small delay to ensure state is updated before navigation
+        // Navigate immediately after state update
+        console.log('🔗 Navigating to dashboard immediately');
         setTimeout(() => {
-          console.log('🔗 Navigating to dashboard...');
           navigate('/dashboard');
-          console.log('🔗 Navigation called');
-        }, 100);
+        }, 0);
       } else {
         console.error('🔗 Login failed:', response.error);
       }
@@ -110,7 +125,7 @@ export function useAuth() {
           isLoading: false,
         });
         queryClient.invalidateQueries({ queryKey: ['user'] });
-        navigate('/dashboard');
+        setShouldNavigate('/dashboard');
       } else {
         console.error('Registration failed:', response.error);
       }

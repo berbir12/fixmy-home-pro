@@ -8,10 +8,12 @@ export class SupabaseApiClient {
 
   setToken(token: string) {
     this.token = token
+    localStorage.setItem('auth_token', token)
   }
 
   clearToken() {
     this.token = null
+    localStorage.removeItem('auth_token')
   }
 
   // Auth methods

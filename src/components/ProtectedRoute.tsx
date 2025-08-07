@@ -24,6 +24,7 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
     );
   }
 
+  // Add a small delay to allow auth state to update
   if (requireAuth && !isAuthenticated) {
     console.log('🔗 ProtectedRoute: Redirecting to auth (not authenticated)');
     // Redirect to login page with the return url

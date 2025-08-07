@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ServiceCard } from "@/components/ServiceCard";
-import { Star, Users, Shield, Clock, ArrowRight, Zap, Wrench, Home, Search, MapPin, Smartphone, AirVent, WashingMachine, Tv, User, MessageCircle, Monitor, Wifi, Camera, Globe, Video, Smartphone as PhoneIcon } from "lucide-react";
+import { Star, Users, Shield, Clock, ArrowRight, Zap, Wrench, Home, Search, MapPin, Smartphone, AirVent, WashingMachine, Tv, User, MessageCircle, Monitor, Wifi, Camera, Globe, Video, Smartphone as PhoneIcon, DollarSign, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -82,6 +82,9 @@ export default function Index() {
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
                 Dashboard
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => navigate("/technician-registration")}>
+                Join as Technician
               </Button>
             </div>
           </div>
@@ -366,6 +369,56 @@ export default function Index() {
                 </p>
               </CardContent>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Join Our Team */}
+      <section className="py-16 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+              Join Our Team of Expert Technicians
+            </h2>
+            <p className="text-xl mb-8 text-muted-foreground">
+              Earn $50-150 per hour with flexible schedules and growth opportunities
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <DollarSign className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Competitive Pay</h3>
+                <p className="text-sm text-muted-foreground">
+                  Earn $50-150 per hour based on your skills and experience
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-accent" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Flexible Schedule</h3>
+                <p className="text-sm text-muted-foreground">
+                  Choose your own hours and work when it suits you
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Briefcase className="w-8 h-8 text-success" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Growth Opportunities</h3>
+                <p className="text-sm text-muted-foreground">
+                  Access to training, certifications, and career advancement
+                </p>
+              </div>
+            </div>
+            <Button 
+              size="lg" 
+              className="rounded-2xl px-8 py-6 text-lg font-semibold"
+              onClick={() => navigate("/technician-registration")}
+            >
+              Apply Now
+            </Button>
           </div>
         </div>
       </section>
