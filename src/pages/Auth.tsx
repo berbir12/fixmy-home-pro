@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,13 +19,15 @@ import {
   ArrowLeft,
   Shield,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 
 type AuthMode = "login" | "register" | "otp";
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const {
     login,
@@ -47,6 +49,7 @@ export default function Auth() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState(["", "", "", ""]);
+  const [emailConfirmationSent, setEmailConfirmationSent] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -54,6 +57,26 @@ export default function Auth() {
     phone: "",
     confirmPassword: ""
   });
+
+  // Check for email confirmation from URL
+  useEffect(() => {
+    const confirmed = searchParams.get('confirmed');
+    if (confirmed === 'true') {
+      setEmailConfirmationSent(true);
+      toast({
+        title: "Email Confirmed!",
+        description: "Your account has been confirmed. You can now sign in.",
+      });
+    }
+  }, [searchParams, toast]);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      console.log('🔗 Auth: User already authenticated, redirecting to dashboard');
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, isLoading, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -85,8 +108,7 @@ export default function Auth() {
       return;
     }
 
-    console.log('🔗 Auth component: Attempting login with:', { email: formData.email });
-    console.log('🔗 Auth component: Current auth state before login:', { isAuthenticated, isLoading });
+    console.log('🔗 Auth: Attempting login with:', { email: formData.email });
     login({ email: formData.email, password: formData.password });
   };
 
@@ -111,7 +133,16 @@ export default function Auth() {
       return;
     }
 
-    console.log('Attempting registration with:', {
+    if (formData.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log('🔗 Auth: Attempting registration with:', {
       email: formData.email,
       name: formData.name,
       phone: formData.phone,
@@ -149,37 +180,60 @@ export default function Auth() {
   };
 
   // Handle errors
-  if (loginError) {
-    console.log('🔗 Auth component: Login error:', loginError);
-    toast({
-      title: "Login Failed",
-      description: loginError?.message || "Invalid email or password",
-      variant: "destructive",
-    });
-  }
+  useEffect(() => {
+    if (loginError) {
+      console.log('🔗 Auth: Login error:', loginError);
+      toast({
+        title: "Login Failed",
+        description: loginError?.message || "Invalid email or password",
+        variant: "destructive",
+      });
+    }
+  }, [loginError, toast]);
 
-  if (registerError) {
-    toast({
-      title: "Registration Failed",
-      description: registerError.message || "Registration failed",
-      variant: "destructive",
-    });
-  }
+  useEffect(() => {
+    if (registerError) {
+      console.log('🔗 Auth: Registration error:', registerError);
+      toast({
+        title: "Registration Failed",
+        description: registerError?.message || "Registration failed",
+        variant: "destructive",
+      });
+    }
+  }, [registerError, toast]);
 
-  if (sendOtpError) {
-    toast({
-      title: "OTP Send Failed",
-      description: sendOtpError.message || "Failed to send OTP",
-      variant: "destructive",
-    });
-  }
+  useEffect(() => {
+    if (sendOtpError) {
+      console.log('🔗 Auth: Send OTP error:', sendOtpError);
+      toast({
+        title: "OTP Send Failed",
+        description: sendOtpError?.message || "Failed to send OTP",
+        variant: "destructive",
+      });
+    }
+  }, [sendOtpError, toast]);
 
-  if (verifyOtpError) {
-    toast({
-      title: "OTP Verification Failed",
-      description: verifyOtpError.message || "Invalid OTP",
-      variant: "destructive",
-    });
+  useEffect(() => {
+    if (verifyOtpError) {
+      console.log('🔗 Auth: Verify OTP error:', verifyOtpError);
+      toast({
+        title: "OTP Verification Failed",
+        description: verifyOtpError?.message || "Invalid OTP",
+        variant: "destructive",
+      });
+    }
+  }, [verifyOtpError, toast]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto" />
+          <p>Loading authentication...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -201,6 +255,23 @@ export default function Auth() {
           <h1 className="text-2xl font-bold text-foreground">Welcome to FixNow</h1>
           <p className="text-muted-foreground">Sign in to your account or create a new one</p>
         </div>
+
+        {/* Email Confirmation Message */}
+        {emailConfirmationSent && (
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-green-800">Email Confirmed!</h3>
+                  <p className="text-sm text-green-700">
+                    Your account has been confirmed. You can now sign in.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardContent className="p-6">
@@ -225,6 +296,7 @@ export default function Auth() {
                         onChange={(e) => handleInputChange("email", e.target.value)}
                         className="pl-10"
                         required
+                        disabled={loginLoading}
                       />
                     </div>
                   </div>
@@ -241,6 +313,7 @@ export default function Auth() {
                         onChange={(e) => handleInputChange("password", e.target.value)}
                         className="pl-10 pr-10"
                         required
+                        disabled={loginLoading}
                       />
                       <Button
                         type="button"
@@ -248,6 +321,7 @@ export default function Auth() {
                         size="icon"
                         className="absolute right-1 top-1/2 transform -translate-y-1/2"
                         onClick={() => setShowPassword(!showPassword)}
+                        disabled={loginLoading}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
@@ -256,16 +330,23 @@ export default function Auth() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="remember" className="rounded" />
+                      <input type="checkbox" id="remember" className="rounded" disabled={loginLoading} />
                       <Label htmlFor="remember" className="text-sm">Remember me</Label>
                     </div>
-                    <Button variant="link" className="text-sm p-0">
+                    <Button variant="link" className="text-sm p-0" disabled={loginLoading}>
                       Forgot password?
                     </Button>
                   </div>
 
                   <Button type="submit" className="w-full" size="lg" disabled={loginLoading}>
-                    {loginLoading ? "Signing In..." : "Sign In"}
+                    {loginLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Signing In...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
                   </Button>
                 </form>
 
@@ -279,6 +360,7 @@ export default function Auth() {
                       variant="outline" 
                       onClick={() => handleSocialLogin("google")}
                       className="w-full"
+                      disabled={loginLoading}
                     >
                       <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -292,6 +374,7 @@ export default function Auth() {
                       variant="outline" 
                       onClick={() => handleSocialLogin("apple")}
                       className="w-full"
+                      disabled={loginLoading}
                     >
                       <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
@@ -316,12 +399,13 @@ export default function Auth() {
                         onChange={(e) => handleInputChange("name", e.target.value)}
                         className="pl-10"
                         required
+                        disabled={registerLoading}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone">Phone Number (Optional)</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
@@ -331,6 +415,7 @@ export default function Auth() {
                         value={formData.phone}
                         onChange={(e) => handleInputChange("phone", e.target.value)}
                         className="pl-10"
+                        disabled={registerLoading}
                       />
                     </div>
                   </div>
@@ -347,6 +432,7 @@ export default function Auth() {
                         onChange={(e) => handleInputChange("email", e.target.value)}
                         className="pl-10"
                         required
+                        disabled={registerLoading}
                       />
                     </div>
                   </div>
@@ -358,11 +444,12 @@ export default function Auth() {
                       <Input
                         id="reg-password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Create a password"
+                        placeholder="Create a password (min 6 characters)"
                         value={formData.password}
                         onChange={(e) => handleInputChange("password", e.target.value)}
                         className="pl-10 pr-10"
                         required
+                        disabled={registerLoading}
                       />
                       <Button
                         type="button"
@@ -370,6 +457,7 @@ export default function Auth() {
                         size="icon"
                         className="absolute right-1 top-1/2 transform -translate-y-1/2"
                         onClick={() => setShowPassword(!showPassword)}
+                        disabled={registerLoading}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
@@ -388,12 +476,13 @@ export default function Auth() {
                         onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                         className="pl-10"
                         required
+                        disabled={registerLoading}
                       />
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="terms" className="rounded" />
+                    <input type="checkbox" id="terms" className="rounded" required disabled={registerLoading} />
                     <Label htmlFor="terms" className="text-sm">
                       I agree to the <Button variant="link" className="text-sm p-0">Terms of Service</Button> and{" "}
                       <Button variant="link" className="text-sm p-0">Privacy Policy</Button>
@@ -401,7 +490,14 @@ export default function Auth() {
                   </div>
 
                   <Button type="submit" className="w-full" size="lg" disabled={registerLoading}>
-                    {registerLoading ? "Creating Account..." : "Create Account"}
+                    {registerLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
                   </Button>
                 </form>
               </TabsContent>
@@ -431,6 +527,7 @@ export default function Auth() {
                           value={digit}
                           onChange={(e) => handleOtpChange(index, e.target.value)}
                           className="w-12 h-12 text-center text-lg font-semibold"
+                          disabled={verifyOtpLoading}
                         />
                       ))}
                     </div>
@@ -439,7 +536,7 @@ export default function Auth() {
                   <div className="text-center space-y-2">
                     <p className="text-sm text-muted-foreground">
                       Didn't receive the code?{" "}
-                      <Button variant="link" className="text-sm p-0">
+                      <Button variant="link" className="text-sm p-0" disabled={verifyOtpLoading}>
                         Resend
                       </Button>
                     </p>
@@ -449,7 +546,14 @@ export default function Auth() {
                   </div>
 
                   <Button type="submit" className="w-full" size="lg" disabled={verifyOtpLoading}>
-                    {verifyOtpLoading ? "Verifying..." : "Verify & Continue"}
+                    {verifyOtpLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Verifying...
+                      </>
+                    ) : (
+                      "Verify & Continue"
+                    )}
                   </Button>
                 </form>
               </TabsContent>

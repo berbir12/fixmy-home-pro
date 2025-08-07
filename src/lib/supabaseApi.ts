@@ -6,14 +6,32 @@ import type { User, Booking, Payment, ChatMessage, ChatContact } from './api'
 export class SupabaseApiClient {
   private token: string | null = null
 
+  constructor() {
+    // Initialize token from localStorage
+    this.token = localStorage.getItem('auth_token')
+    
+    // Set up auth state listener
+    supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔗 Auth state changed:', event, session?.user?.id)
+      
+      if (event === 'SIGNED_IN' && session) {
+        this.setToken(session.access_token)
+      } else if (event === 'SIGNED_OUT') {
+        this.clearToken()
+      }
+    })
+  }
+
   setToken(token: string) {
     this.token = token
     localStorage.setItem('auth_token', token)
+    console.log('🔗 Token set:', token.substring(0, 20) + '...')
   }
 
   clearToken() {
     this.token = null
     localStorage.removeItem('auth_token')
+    console.log('🔗 Token cleared')
   }
 
   // Auth methods
@@ -23,6 +41,7 @@ export class SupabaseApiClient {
       const { data, error } = await supabaseHelpers.signIn(email, password)
       
       if (error) {
+        console.error('🔗 Login error:', error);
         return {
           success: false,
           error: error.message
@@ -30,9 +49,18 @@ export class SupabaseApiClient {
       }
 
       if (!data.user) {
+        console.error('🔗 Login failed: No user data');
         return {
           success: false,
           error: 'Login failed'
+        }
+      }
+
+      if (!data.session) {
+        console.error('🔗 Login failed: No session');
+        return {
+          success: false,
+          error: 'Login failed - no session'
         }
       }
 
@@ -57,11 +85,13 @@ export class SupabaseApiClient {
 
       this.setToken(data.session.access_token)
 
+      console.log('🔗 Login successful:', { userId: user.id, role: user.role });
       return {
         success: true,
         data: { user, token: data.session.access_token }
       }
     } catch (error) {
+      console.error('🔗 Login exception:', error);
       return {
         success: false,
         error: 'Login failed'
@@ -74,7 +104,7 @@ export class SupabaseApiClient {
     password: string
     name: string
     phone?: string
-  }): Promise<ApiResponse<{ user: User; token: string }>> {
+  }): Promise<ApiResponse<{ user: User; token: string; requiresEmailConfirmation?: boolean }>> {
     console.log('🔗 SupabaseApiClient register called with:', userData);
     try {
       const { data, error } = await supabaseHelpers.signUp(
@@ -90,6 +120,7 @@ export class SupabaseApiClient {
       console.log('🔗 Supabase signUp response:', { data, error });
 
       if (error) {
+        console.error('🔗 Registration error:', error);
         return {
           success: false,
           error: error.message
@@ -97,6 +128,7 @@ export class SupabaseApiClient {
       }
 
       if (!data.user) {
+        console.error('🔗 Registration failed: No user data');
         return {
           success: false,
           error: 'Registration failed'
@@ -105,9 +137,27 @@ export class SupabaseApiClient {
 
       // Check if email confirmation is required
       if (data.user && !data.session) {
+        console.log('🔗 Email confirmation required');
         return {
-          success: false,
-          error: 'Please check your email to confirm your account before logging in.'
+          success: true,
+          data: { 
+            user: {
+              id: data.user.id,
+              email: data.user.email!,
+              name: userData.name,
+              role: 'customer',
+              phone: userData.phone,
+              addresses: [],
+              preferences: {
+                notifications: { email: true, sms: true, push: true },
+                privacy: { shareLocation: false, shareContact: false }
+              },
+              createdAt: data.user.created_at,
+              updatedAt: data.user.created_at
+            }, 
+            token: '',
+            requiresEmailConfirmation: true
+          }
         }
       }
 
@@ -138,17 +188,20 @@ export class SupabaseApiClient {
 
       if (data.session) {
         this.setToken(data.session.access_token)
+        console.log('🔗 Registration successful with session:', { userId: user.id });
         return {
           success: true,
           data: { user, token: data.session.access_token }
         }
       }
 
+      console.log('🔗 Registration successful without session:', { userId: user.id });
       return {
         success: true,
         data: { user, token: '' }
       }
     } catch (error) {
+      console.error('🔗 Registration exception:', error);
       return {
         success: false,
         error: 'Registration failed'
@@ -191,15 +244,30 @@ export class SupabaseApiClient {
   }
 
   async logout(): Promise<void> {
+    console.log('🔗 Logout called');
     await supabaseHelpers.signOut()
     this.clearToken()
   }
 
   async getCurrentUser(): Promise<ApiResponse<User>> {
     try {
+      console.log('🔗 getCurrentUser called');
+      
+      // First try to get session
+      const { session, error: sessionError } = await supabaseHelpers.getSession()
+      
+      if (sessionError || !session) {
+        console.log('🔗 No active session found');
+        return {
+          success: false,
+          error: 'No active session'
+        }
+      }
+
       const { user, error } = await supabaseHelpers.getCurrentUser()
 
       if (error || !user) {
+        console.log('🔗 No user found');
         return {
           success: false,
           error: 'User not found'
@@ -224,11 +292,13 @@ export class SupabaseApiClient {
         updatedAt: user.updated_at || user.created_at
       }
 
+      console.log('🔗 Current user found:', { userId: userData.id, role: userData.role });
       return {
         success: true,
         data: userData
       }
     } catch (error) {
+      console.error('🔗 getCurrentUser exception:', error);
       return {
         success: false,
         error: 'Failed to get user'
