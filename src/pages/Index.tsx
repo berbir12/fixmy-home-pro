@@ -3,31 +3,52 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ServiceCard } from "@/components/ServiceCard";
-import { Star, Users, Shield, Clock, ArrowRight, Zap, Wrench, Home, Search, MapPin, Smartphone, AirVent, WashingMachine, Tv, User, MessageCircle } from "lucide-react";
+import { Star, Users, Shield, Clock, ArrowRight, Zap, Wrench, Home, Search, MapPin, Smartphone, AirVent, WashingMachine, Tv, User, MessageCircle, Monitor, Wifi, Camera, Globe, Video, Smartphone as PhoneIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const featuredServices = [
   {
-    id: "ac",
-    title: "Air Conditioning",
-    description: "Installation, repair & maintenance",
-    icon: <AirVent className="w-6 h-6 text-primary" />,
-    services: ["Installation", "Repair", "Cleaning"]
+    id: "computer-services",
+    title: "Computer Services",
+    description: "Diagnostics, repair & setup",
+    icon: <Monitor className="w-6 h-6 text-primary" />,
+    services: ["Computer Repair", "Laptop Repair", "Gaming PC Build", "Software Setup"]
   },
   {
-    id: "washing-machine", 
-    title: "Washing Machine",
-    description: "All washing machine services",
-    icon: <WashingMachine className="w-6 h-6 text-primary" />,
-    services: ["Installation", "Repair", "Cleaning"]
+    id: "network-services", 
+    title: "Network Services",
+    description: "WiFi setup & optimization",
+    icon: <Wifi className="w-6 h-6 text-primary" />,
+    services: ["Network Setup", "WiFi Optimization", "Server Setup"]
   },
   {
-    id: "tv",
-    title: "Television",
-    description: "TV mounting, repair & setup", 
-    icon: <Tv className="w-6 h-6 text-primary" />,
-    services: ["Wall Mounting", "Screen Repair", "Setup"]
+    id: "smart-home",
+    title: "Smart Home",
+    description: "Automation & IoT setup",
+    icon: <Home className="w-6 h-6 text-primary" />,
+    services: ["Smart Home Setup", "IoT Integration", "Smart Office"]
+  },
+  {
+    id: "security-services",
+    title: "Security Services",
+    description: "Cameras & cybersecurity",
+    icon: <Camera className="w-6 h-6 text-primary" />,
+    services: ["Security Cameras", "Cybersecurity", "Access Control"]
+  },
+  {
+    id: "web-digital",
+    title: "Web & Digital",
+    description: "Website & digital services",
+    icon: <Globe className="w-6 h-6 text-primary" />,
+    services: ["Website Development", "E-commerce Setup", "Digital Marketing"]
+  },
+  {
+    id: "creative-services",
+    title: "Creative Services",
+    description: "Video, audio & media setup",
+    icon: <Video className="w-6 h-6 text-primary" />,
+    services: ["Video Editing", "Audio Recording", "Live Streaming"]
   }
 ];
 
@@ -157,9 +178,9 @@ export default function Index() {
             
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                { name: "John Smith", rating: 4.9, eta: "15 min", specialty: "AC Repair" },
-                { name: "Sarah Johnson", rating: 4.8, eta: "22 min", specialty: "Appliance Install" },
-                { name: "Mike Wilson", rating: 4.7, eta: "28 min", specialty: "Maintenance" }
+                { name: "John Smith", rating: 4.9, eta: "15 min", specialty: "Computer Repair" },
+                { name: "Sarah Johnson", rating: 4.8, eta: "22 min", specialty: "Network Setup" },
+                { name: "Mike Wilson", rating: 4.7, eta: "28 min", specialty: "Smart Home" }
               ].map((tech, index) => (
                 <Card key={index} className="border-2 border-transparent hover:border-accent transition-colors cursor-pointer rounded-3xl">
                   <CardContent className="p-4">
@@ -200,7 +221,7 @@ export default function Index() {
               Popular Services
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Choose from our most requested appliance services
+              Choose from our comprehensive technical and home services
             </p>
           </div>
           
