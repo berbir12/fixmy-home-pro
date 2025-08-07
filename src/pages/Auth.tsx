@@ -83,6 +83,7 @@ export default function Auth() {
       return;
     }
 
+    console.log('🔗 Auth component: Attempting login with:', { email: formData.email });
     login({ email: formData.email, password: formData.password });
   };
 
@@ -146,9 +147,10 @@ export default function Auth() {
 
   // Handle errors
   if (loginError) {
+    console.log('🔗 Auth component: Login error:', loginError);
     toast({
       title: "Login Failed",
-      description: loginError.message || "Invalid email or password",
+      description: loginError?.message || "Invalid email or password",
       variant: "destructive",
     });
   }

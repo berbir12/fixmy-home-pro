@@ -105,3 +105,10 @@ export const api = new SupabaseApiClient();
 console.log('🔗 API Client: Using SupabaseApiClient');
 console.log('🔗 Supabase URL:', import.meta.env.VITE_SUPABASE_URL ? 'Configured' : 'Not configured');
 console.log('🔗 Supabase Anon Key:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Configured' : 'Not configured');
+
+// Check if environment variables are missing
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+  console.error('❌ Missing Supabase environment variables!');
+  console.error('❌ VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL);
+  console.error('❌ VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Missing');
+}

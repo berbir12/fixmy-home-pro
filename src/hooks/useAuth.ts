@@ -60,9 +60,12 @@ export function useAuth() {
 
   // Login mutation
   const loginMutation = useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      api.login(email, password),
+    mutationFn: ({ email, password }: { email: string; password: string }) => {
+      console.log('🔗 Login mutation called with:', { email });
+      return api.login(email, password);
+    },
     onSuccess: (response) => {
+      console.log('🔗 Login success response:', response);
       if (response.success && response.data) {
         setAuthState({
           user: response.data.user,
@@ -71,10 +74,12 @@ export function useAuth() {
         });
         queryClient.invalidateQueries({ queryKey: ['user'] });
         navigate('/dashboard');
+      } else {
+        console.error('🔗 Login failed:', response.error);
       }
     },
     onError: (error) => {
-      console.error('Login error:', error);
+      console.error('🔗 Login error:', error);
     },
   });
 
