@@ -73,6 +73,7 @@ export class SupabaseApiClient {
     name: string
     phone?: string
   }): Promise<ApiResponse<{ user: User; token: string }>> {
+    console.log('🔗 SupabaseApiClient register called with:', userData);
     try {
       const { data, error } = await supabaseHelpers.signUp(
         userData.email,
@@ -83,6 +84,8 @@ export class SupabaseApiClient {
           phone: userData.phone
         }
       )
+
+      console.log('🔗 Supabase signUp response:', { data, error });
 
       if (error) {
         return {
@@ -95,6 +98,14 @@ export class SupabaseApiClient {
         return {
           success: false,
           error: 'Registration failed'
+        }
+      }
+
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        return {
+          success: false,
+          error: 'Please check your email to confirm your account before logging in.'
         }
       }
 
