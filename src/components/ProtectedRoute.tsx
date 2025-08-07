@@ -11,6 +11,8 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
+  console.log('🔗 ProtectedRoute:', { isAuthenticated, isLoading, requireAuth, pathname: location.pathname });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -23,14 +25,17 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
   }
 
   if (requireAuth && !isAuthenticated) {
+    console.log('🔗 ProtectedRoute: Redirecting to auth (not authenticated)');
     // Redirect to login page with the return url
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   if (!requireAuth && isAuthenticated) {
+    console.log('🔗 ProtectedRoute: Redirecting to dashboard (already authenticated)');
     // Redirect authenticated users away from auth pages
     return <Navigate to="/dashboard" replace />;
   }
 
+  console.log('🔗 ProtectedRoute: Rendering children');
   return <>{children}</>;
 }

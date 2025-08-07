@@ -67,13 +67,20 @@ export function useAuth() {
     onSuccess: (response) => {
       console.log('🔗 Login success response:', response);
       if (response.success && response.data) {
+        console.log('🔗 Setting auth state with user:', response.data.user);
         setAuthState({
           user: response.data.user,
           isAuthenticated: true,
           isLoading: false,
         });
         queryClient.invalidateQueries({ queryKey: ['user'] });
-        navigate('/dashboard');
+        
+        // Add a small delay to ensure state is updated before navigation
+        setTimeout(() => {
+          console.log('🔗 Navigating to dashboard...');
+          navigate('/dashboard');
+          console.log('🔗 Navigation called');
+        }, 100);
       } else {
         console.error('🔗 Login failed:', response.error);
       }
