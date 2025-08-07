@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ServiceCard } from "@/components/ServiceCard";
-import { Star, Users, Shield, Clock, ArrowRight, Zap, Wrench, Home, Search, MapPin, Smartphone, AirVent, WashingMachine, Tv } from "lucide-react";
+import { Star, Users, Shield, Clock, ArrowRight, Zap, Wrench, Home, Search, MapPin, Smartphone, AirVent, WashingMachine, Tv, User, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -51,9 +51,20 @@ export default function Index() {
               </div>
               <span className="text-xl font-bold text-primary">FixNow</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="w-4 h-4" />
-              <span>Current Location</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="w-4 h-4" />
+                <span>Current Location</span>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
+                Sign In
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
+                Dashboard
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => navigate("/technician-registration")}>
+                Join as Technician
+              </Button>
             </div>
           </div>
         </div>
@@ -273,6 +284,70 @@ export default function Index() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Access Features */}
+      <section className="py-16 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Powerful Features
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Everything you need for seamless home service management
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/dashboard")}>
+              <CardContent className="p-6">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Dashboard</h3>
+                <p className="text-sm text-muted-foreground">
+                  Track bookings, payments, and manage your account
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/chat")}>
+              <CardContent className="p-6">
+                <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle className="w-8 h-8 text-accent" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Live Chat</h3>
+                <p className="text-sm text-muted-foreground">
+                  Real-time communication with technicians and support
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/auth")}>
+              <CardContent className="p-6">
+                <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-8 h-8 text-success" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Secure Login</h3>
+                <p className="text-sm text-muted-foreground">
+                  Bank-level security with OTP verification
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/services")}>
+              <CardContent className="p-6">
+                <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Wrench className="w-8 h-8 text-warning" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Book Service</h3>
+                <p className="text-sm text-muted-foreground">
+                  Quick booking with instant technician matching
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
