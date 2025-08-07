@@ -73,6 +73,8 @@ TechConnect Portal is a comprehensive full-stack web application serving as the 
 
 ### 2. **Technician Portal** 🔧
 
+*Technicians are hired as employees with assigned schedules and managed by the company.*
+
 #### **Core Features:**
 - ✅ **Secure Login**
   - Role-based authentication
@@ -130,11 +132,11 @@ TechConnect Portal is a comprehensive full-stack web application serving as the 
   - Technician performance
 
 - ✅ **Technician Management**
-  - Add/edit technician profiles
-  - Manage certifications
-  - Set availability schedules
-  - Performance monitoring
-  - Payroll management
+  - Hire and onboard new technicians
+  - Manage employee profiles and certifications
+  - Set work schedules and availability
+  - Performance monitoring and reviews
+  - Payroll and benefits management
 
 - ✅ **Scheduling System**
   - Assign jobs to technicians
@@ -434,7 +436,7 @@ For support and questions:
 - [x] Payment integration
 
 ### **Phase 3: Technician Portal** 🔄
-- [x] Technician registration
+- [x] Technician onboarding (employee hiring process)
 - [ ] Technician dashboard
 - [ ] Job management
 - [ ] Time tracking

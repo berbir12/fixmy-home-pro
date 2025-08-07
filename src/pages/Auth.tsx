@@ -107,6 +107,12 @@ export default function Auth() {
       return;
     }
 
+    console.log('Attempting registration with:', {
+      email: formData.email,
+      name: formData.name,
+      phone: formData.phone,
+    });
+
     register({
       email: formData.email,
       password: formData.password,
@@ -320,7 +326,6 @@ export default function Auth() {
                         value={formData.phone}
                         onChange={(e) => handleInputChange("phone", e.target.value)}
                         className="pl-10"
-                        required
                       />
                     </div>
                   </div>
@@ -383,7 +388,7 @@ export default function Auth() {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="terms" className="rounded" required />
+                    <input type="checkbox" id="terms" className="rounded" />
                     <Label htmlFor="terms" className="text-sm">
                       I agree to the <Button variant="link" className="text-sm p-0">Terms of Service</Button> and{" "}
                       <Button variant="link" className="text-sm p-0">Privacy Policy</Button>

@@ -1,6 +1,6 @@
 // API Base Configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const USE_SUPABASE = import.meta.env.VITE_USE_SUPABASE === 'true';
+const USE_SUPABASE = import.meta.env.VITE_USE_SUPABASE === 'true' || false;
 
 // Types for API responses
 export interface ApiResponse<T> {
@@ -510,10 +510,12 @@ export class MockApiClient {
     name: string;
     phone?: string;
   }): Promise<ApiResponse<{ user: User; token: string }>> {
+    console.log('MockApiClient register called with:', userData);
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     const existingUser = this.users.find(u => u.email === userData.email);
     if (existingUser) {
+      console.log('User already exists:', userData.email);
       return {
         success: false,
         error: 'User already exists',
@@ -546,6 +548,7 @@ export class MockApiClient {
     const token = 'mock_jwt_token_' + Date.now();
     localStorage.setItem('auth_token', token);
 
+    console.log('Registration successful, created user:', newUser);
     return {
       success: true,
       data: {
@@ -650,6 +653,209 @@ export class MockApiClient {
 
   async logout(): Promise<void> {
     localStorage.removeItem('auth_token');
+  }
+
+  async updateProfile(userData: Partial<User>): Promise<ApiResponse<User>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const user = this.users[0]; // Mock current user
+    const updatedUser = { ...user, ...userData };
+    this.users[0] = updatedUser;
+    return {
+      success: true,
+      data: updatedUser,
+    };
+  }
+
+  async addAddress(address: Omit<Address, 'id'>): Promise<ApiResponse<Address>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const newAddress: Address = {
+      id: (this.users[0]?.addresses.length || 0 + 1).toString(),
+      ...address,
+    };
+    if (this.users[0]) {
+      this.users[0].addresses.push(newAddress);
+    }
+    return {
+      success: true,
+      data: newAddress,
+    };
+  }
+
+  async updateAddress(addressId: string, address: Partial<Address>): Promise<ApiResponse<Address>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    if (this.users[0]) {
+      const addressIndex = this.users[0].addresses.findIndex(addr => addr.id === addressId);
+      if (addressIndex !== -1) {
+        this.users[0].addresses[addressIndex] = { ...this.users[0].addresses[addressIndex], ...address };
+        return {
+          success: true,
+          data: this.users[0].addresses[addressIndex],
+        };
+      }
+    }
+    return {
+      success: false,
+      error: 'Address not found',
+    };
+  }
+
+  async deleteAddress(addressId: string): Promise<ApiResponse<void>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    if (this.users[0]) {
+      this.users[0].addresses = this.users[0].addresses.filter(addr => addr.id !== addressId);
+    }
+    return {
+      success: true,
+    };
+  }
+
+  async getBooking(bookingId: string): Promise<ApiResponse<Booking>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const booking = this.bookings.find(b => b.id === bookingId);
+    if (booking) {
+      return {
+        success: true,
+        data: booking,
+      };
+    }
+    return {
+      success: false,
+      error: 'Booking not found',
+    };
+  }
+
+  async createBooking(bookingData: {
+    serviceId: string;
+    technicianId: string;
+    scheduledDate: string;
+    scheduledTime: string;
+    address: string;
+    description: string;
+  }): Promise<ApiResponse<Booking>> {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const newBooking: Booking = {
+      id: (this.bookings.length + 1).toString(),
+      serviceId: bookingData.serviceId,
+      serviceName: 'Mock Service',
+      technicianId: bookingData.technicianId,
+      technicianName: 'John Smith',
+      userId: '1',
+      status: 'pending',
+      scheduledDate: bookingData.scheduledDate,
+      scheduledTime: bookingData.scheduledTime,
+      address: bookingData.address,
+      description: bookingData.description,
+      price: 99.99,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.bookings.push(newBooking);
+    return {
+      success: true,
+      data: newBooking,
+    };
+  }
+
+  async cancelBooking(bookingId: string): Promise<ApiResponse<Booking>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const booking = this.bookings.find(b => b.id === bookingId);
+    if (booking) {
+      booking.status = 'cancelled';
+      booking.updatedAt = new Date().toISOString();
+      return {
+        success: true,
+        data: booking,
+      };
+    }
+    return {
+      success: false,
+      error: 'Booking not found',
+    };
+  }
+
+  async rateBooking(bookingId: string, rating: number, review?: string): Promise<ApiResponse<Booking>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const booking = this.bookings.find(b => b.id === bookingId);
+    if (booking) {
+      booking.rating = rating;
+      booking.review = review;
+      booking.updatedAt = new Date().toISOString();
+      return {
+        success: true,
+        data: booking,
+      };
+    }
+    return {
+      success: false,
+      error: 'Booking not found',
+    };
+  }
+
+  async createPayment(paymentData: {
+    bookingId: string;
+    amount: number;
+    method: Payment['method'];
+  }): Promise<ApiResponse<Payment>> {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const newPayment: Payment = {
+      id: (this.payments.length + 1).toString(),
+      bookingId: paymentData.bookingId,
+      amount: paymentData.amount,
+      currency: 'USD',
+      method: paymentData.method,
+      status: 'completed',
+      transactionId: 'mock_transaction_' + Date.now(),
+      createdAt: new Date().toISOString(),
+    };
+    this.payments.push(newPayment);
+    return {
+      success: true,
+      data: newPayment,
+    };
+  }
+
+  async getServices(): Promise<ApiResponse<any[]>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return {
+      success: true,
+      data: [
+        { id: '1', name: 'Computer Repair', price: 89.99 },
+        { id: '2', name: 'Network Setup', price: 149.99 },
+        { id: '3', name: 'Smart Home Setup', price: 199.99 },
+      ],
+    };
+  }
+
+  async getService(serviceId: string): Promise<ApiResponse<any>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const services = [
+      { id: '1', name: 'Computer Repair', price: 89.99, description: 'Professional computer repair services' },
+      { id: '2', name: 'Network Setup', price: 149.99, description: 'Professional network installation' },
+      { id: '3', name: 'Smart Home Setup', price: 199.99, description: 'Complete smart home installation' },
+    ];
+    const service = services.find(s => s.id === serviceId);
+    if (service) {
+      return {
+        success: true,
+        data: service,
+      };
+    }
+    return {
+      success: false,
+      error: 'Service not found',
+    };
+  }
+
+  async getTechnicians(serviceId: string): Promise<ApiResponse<any[]>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return {
+      success: true,
+      data: [
+        { id: '1', name: 'John Smith', rating: 4.9, specialty: 'Computer Repair' },
+        { id: '2', name: 'Sarah Johnson', rating: 4.8, specialty: 'Network Setup' },
+        { id: '3', name: 'Mike Wilson', rating: 4.7, specialty: 'Smart Home' },
+      ],
+    };
   }
 }
 

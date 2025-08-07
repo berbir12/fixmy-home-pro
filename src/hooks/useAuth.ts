@@ -85,8 +85,12 @@ export function useAuth() {
       password: string;
       name: string;
       phone?: string;
-    }) => api.register(userData),
+    }) => {
+      console.log('Register mutation called with:', userData);
+      return api.register(userData);
+    },
     onSuccess: (response) => {
+      console.log('Register success:', response);
       if (response.success && response.data) {
         setAuthState({
           user: response.data.user,
@@ -95,6 +99,8 @@ export function useAuth() {
         });
         queryClient.invalidateQueries({ queryKey: ['user'] });
         navigate('/dashboard');
+      } else {
+        console.error('Registration failed:', response.error);
       }
     },
     onError: (error) => {

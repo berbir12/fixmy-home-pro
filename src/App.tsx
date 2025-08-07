@@ -14,7 +14,7 @@ import BookingSuccess from "./pages/BookingSuccess";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
-import TechnicianRegistration from "./pages/TechnicianRegistration";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,7 +38,7 @@ const App = () => (
                 <Auth />
               </ProtectedRoute>
             } />
-            <Route path="/technician-registration" element={<TechnicianRegistration />} />
+
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />

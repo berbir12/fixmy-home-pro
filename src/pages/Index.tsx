@@ -83,9 +83,6 @@ export default function Index() {
               <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
                 Dashboard
               </Button>
-              <Button variant="secondary" size="sm" onClick={() => navigate("/technician-registration")}>
-                Join as Technician
-              </Button>
             </div>
           </div>
         </div>

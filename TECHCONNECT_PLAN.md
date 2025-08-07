@@ -304,7 +304,7 @@ CREATE TABLE messages (
 - [x] Payment integration
 
 ### **Phase 3: Technician Portal** (Week 5-6)
-- [ ] Technician registration
+- [ ] Technician onboarding (employee hiring process)
 - [ ] Technician dashboard
 - [ ] Job management
 - [ ] Time tracking
