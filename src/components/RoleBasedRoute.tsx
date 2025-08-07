@@ -1,21 +1,29 @@
 import { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { UserRole } from '@/types/auth';
 
 interface RoleBasedRouteProps {
   children: ReactNode;
-  allowedRoles: UserRole[];
+  allowedRoles: string[];
   fallbackPath?: string;
 }
 
 export function RoleBasedRoute({ 
   children, 
   allowedRoles, 
-  fallbackPath = '/auth' 
+  fallbackPath = "/dashboard" 
 }: RoleBasedRouteProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
+
+  console.log('🔗 RoleBasedRoute:', { 
+    userRole: user?.role, 
+    allowedRoles, 
+    isAuthenticated, 
+    isLoading,
+    pathname: location.pathname,
+    timestamp: new Date().toISOString()
+  });
 
   if (isLoading) {
     return (
@@ -28,21 +36,18 @@ export function RoleBasedRoute({
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to={fallbackPath} state={{ from: location }} replace />;
+  // Check if user is authenticated
+  if (!isAuthenticated || !user) {
+    console.log('🔗 RoleBasedRoute: Redirecting to auth (not authenticated)');
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  if (!user || !allowedRoles.includes(user.role)) {
-    // Redirect to appropriate dashboard based on user role
-    const roleDashboardMap = {
-      customer: '/dashboard',
-      technician: '/technician/dashboard',
-      admin: '/admin/dashboard'
-    };
-    
-    const redirectPath = user ? roleDashboardMap[user.role] : fallbackPath;
-    return <Navigate to={redirectPath} replace />;
+  // Check if user has required role
+  if (!allowedRoles.includes(user.role || 'customer')) {
+    console.log('🔗 RoleBasedRoute: Redirecting to fallback (insufficient permissions)');
+    return <Navigate to={fallbackPath} replace />;
   }
 
+  console.log('🔗 RoleBasedRoute: Rendering children (authorized)');
   return <>{children}</>;
 }
