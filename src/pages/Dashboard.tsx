@@ -503,40 +503,48 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={() => navigate('/services')}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Book New Service
-                  </Button>
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={() => setActiveTab('profile')}
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Update Profile
-                  </Button>
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={() => setActiveTab('support')}
-                  >
-                    <HelpCircle className="w-4 h-4 mr-2" />
-                    Get Help
-                  </Button>
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={handlePrivacySettings}
-                  >
-                    <Shield className="w-4 h-4 mr-2" />
-                    Privacy Settings
-                  </Button>
-                </CardContent>
+                                 <CardContent className="space-y-3">
+                   <Button 
+                     className="w-full justify-start" 
+                     variant="outline"
+                     onClick={() => navigate('/services')}
+                   >
+                     <Plus className="w-4 h-4 mr-2" />
+                     Book New Service
+                   </Button>
+                   <Button 
+                     className="w-full justify-start" 
+                     variant="outline"
+                     onClick={() => navigate('/technician-registration')}
+                   >
+                     <Wrench className="w-4 h-4 mr-2" />
+                     Join as Technician
+                   </Button>
+                   <Button 
+                     className="w-full justify-start" 
+                     variant="outline"
+                     onClick={() => setActiveTab('profile')}
+                   >
+                     <Edit className="w-4 h-4 mr-2" />
+                     Update Profile
+                   </Button>
+                   <Button 
+                     className="w-full justify-start" 
+                     variant="outline"
+                     onClick={() => setActiveTab('support')}
+                   >
+                     <HelpCircle className="w-4 h-4 mr-2" />
+                     Get Help
+                   </Button>
+                   <Button 
+                     className="w-full justify-start" 
+                     variant="outline"
+                     onClick={handlePrivacySettings}
+                   >
+                     <Shield className="w-4 h-4 mr-2" />
+                     Privacy Settings
+                   </Button>
+                 </CardContent>
               </Card>
             </div>
           </TabsContent>
