@@ -137,9 +137,9 @@ class Api {
   async register(userData: {
     email: string;
     password: string;
-  name: string;
+    name: string;
     phone?: string;
-  }): Promise<ApiResponse<{ user: Customer; requiresEmailConfirmation?: boolean }>> {
+  }): Promise<ApiResponse<{ user: Admin | Customer | Technician; requiresEmailConfirmation?: boolean }>> {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
@@ -158,53 +158,105 @@ class Api {
         return { success: false, error: 'Registration failed' };
       }
 
-      // Use a safer approach to create customer record
-      try {
-        const { error: customerError } = await supabase
-          .from('customers')
-          .insert({
-            id: authData.user.id,
-            email: userData.email,
-            name: userData.name,
-            phone: userData.phone,
-            role: 'customer',
-          });
+      // Check if this email should be an admin (you can customize this logic)
+      const isAdminEmail = userData.email.includes('admin') || 
+                          userData.email.includes('fixmyhomepro.com') ||
+                          userData.email.includes('@admin');
 
-        if (customerError) {
-          console.warn('Customer creation error (non-critical):', customerError);
-          // Don't throw here, continue with the registration
+      if (isAdminEmail) {
+        // Create admin record
+        try {
+          const { error: adminError } = await supabase
+            .from('admins')
+            .insert({
+              id: authData.user.id,
+              email: userData.email,
+              name: userData.name,
+              phone: userData.phone,
+              role: 'admin',
+              is_super_admin: false,
+            });
+
+          if (adminError) {
+            console.warn('Admin creation error (non-critical):', adminError);
+          }
+        } catch (insertError) {
+          console.warn('Admin insert failed (non-critical):', insertError);
         }
-      } catch (insertError) {
-        console.warn('Customer insert failed (non-critical):', insertError);
-        // Continue with registration even if customer record creation fails
+
+        const admin: Admin = {
+          id: authData.user.id,
+          email: userData.email,
+          name: userData.name,
+          phone: userData.phone,
+          role: 'admin',
+          permissions: {
+            users: { view: true, edit: true, delete: true },
+            bookings: { view: true, edit: true, delete: true },
+            technicians: { view: true, edit: true, delete: true },
+            applications: { view: true, approve: true, reject: true },
+            reports: { view: true, export: true },
+            settings: { view: true, edit: true },
+          },
+          is_super_admin: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        return {
+          success: true,
+          data: {
+            user: admin,
+            requiresEmailConfirmation: authData.user.email_confirmed_at === null,
+          },
+        };
+      } else {
+        // Default to customer
+        try {
+          const { error: customerError } = await supabase
+            .from('customers')
+            .insert({
+              id: authData.user.id,
+              email: userData.email,
+              name: userData.name,
+              phone: userData.phone,
+              role: 'customer',
+            });
+
+          if (customerError) {
+            console.warn('Customer creation error (non-critical):', customerError);
+          }
+        } catch (insertError) {
+          console.warn('Customer insert failed (non-critical):', insertError);
+        }
+
+        const customer: Customer = {
+          id: authData.user.id,
+          email: userData.email,
+          name: userData.name,
+          phone: userData.phone,
+          role: 'customer',
+          addresses: [],
+          preferences: {
+            notifications: { email: true, sms: true, push: true },
+            privacy: { shareLocation: false, shareContact: false },
+          },
+          total_spent: 0,
+          loyalty_points: 0,
+          preferred_technicians: [],
+          is_verified: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        return {
+          success: true,
+          data: {
+            user: customer,
+            requiresEmailConfirmation: authData.user.email_confirmed_at === null,
+          },
+        };
       }
-
-      const customer: Customer = {
-        id: authData.user.id,
-        email: userData.email,
-        name: userData.name,
-        phone: userData.phone,
-        role: 'customer',
-        addresses: [],
-        preferences: {
-          notifications: { email: true, sms: true, push: true },
-          privacy: { shareLocation: false, shareContact: false },
-        },
-        total_spent: 0,
-        loyalty_points: 0,
-        preferred_technicians: [],
-        is_verified: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      return {
-        success: true,
-        data: {
-          user: customer,
-          requiresEmailConfirmation: authData.user.email_confirmed_at === null,
-        },
-      };
     } catch (error: any) {
       console.error('Registration error:', error);
       return { success: false, error: error.message || 'Registration failed' };
