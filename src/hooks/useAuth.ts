@@ -81,10 +81,18 @@ export function useAuth() {
         console.log('🔗 useAuth: Login successful, invalidating queries');
         queryClient.invalidateQueries({ queryKey: ['currentUser'] });
         
-        // Navigate to dashboard after successful login
+        // Navigate based on user role after successful login
         setTimeout(() => {
-          console.log('🔗 useAuth: Navigating to dashboard after login');
-          navigate('/dashboard');
+          const userRole = response.data.user.role;
+          console.log('🔗 useAuth: User role:', userRole);
+          
+          if (userRole === 'admin') {
+            console.log('🔗 useAuth: Navigating to admin dashboard after login');
+            navigate('/admin');
+          } else {
+            console.log('🔗 useAuth: Navigating to user dashboard after login');
+            navigate('/dashboard');
+          }
         }, 100);
       } else {
         console.error('🔗 useAuth: Login failed:', response.error);
@@ -116,10 +124,18 @@ export function useAuth() {
           console.log('🔗 useAuth: Registration successful, invalidating queries');
           queryClient.invalidateQueries({ queryKey: ['currentUser'] });
           
-          // Navigate to dashboard after successful registration
+          // Navigate based on user role after successful registration
           setTimeout(() => {
-            console.log('🔗 useAuth: Navigating to dashboard after registration');
-            navigate('/dashboard');
+            const userRole = response.data.user.role;
+            console.log('🔗 useAuth: User role after registration:', userRole);
+            
+            if (userRole === 'admin') {
+              console.log('🔗 useAuth: Navigating to admin dashboard after registration');
+              navigate('/admin');
+            } else {
+              console.log('🔗 useAuth: Navigating to user dashboard after registration');
+              navigate('/dashboard');
+            }
           }, 100);
         }
       } else {

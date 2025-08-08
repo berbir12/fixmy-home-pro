@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,7 @@ type AuthMode = "login" | "register" | "otp";
 
 export default function Auth() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const {
@@ -73,10 +74,29 @@ export default function Auth() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      console.log('🔗 Auth: User already authenticated, redirecting to dashboard');
-      navigate('/dashboard');
+      console.log('🔗 Auth: User already authenticated, checking intended destination');
+      
+      // Check if there's a specific destination from the router state
+      const from = location.state?.from?.pathname;
+      
+      if (from && from !== '/auth') {
+        console.log('🔗 Auth: Redirecting to intended destination:', from);
+        navigate(from);
+      } else {
+        // Navigate based on user role
+        const userRole = user?.role;
+        console.log('🔗 Auth: User role:', userRole);
+        
+        if (userRole === 'admin') {
+          console.log('🔗 Auth: Redirecting to admin dashboard');
+          navigate('/admin');
+        } else {
+          console.log('🔗 Auth: Redirecting to user dashboard');
+          navigate('/dashboard');
+        }
+      }
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, navigate, user]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
