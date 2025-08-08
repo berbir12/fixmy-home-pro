@@ -31,6 +31,7 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const {
+    user,
     login,
     register,
     sendOtp,

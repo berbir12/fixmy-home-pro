@@ -1,248 +1,173 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { api } from "@/lib/api";
 import {
   Users,
-  Wrench,
   Calendar,
-  DollarSign,
-  MessageSquare,
+  Wrench,
+  FileText,
   Settings,
-  Shield,
+  LogOut,
+  Plus,
+  Search,
+  Filter,
+  MoreHorizontal,
   Eye,
+  Edit,
+  Trash2,
   CheckCircle,
   XCircle,
   Clock,
-  Star,
+  DollarSign,
   TrendingUp,
-  AlertTriangle,
-  LogOut,
-  ArrowLeft,
-  Filter,
-  Search,
-  Download,
-  Edit,
-  Trash2,
-  Plus,
-  UserPlus,
-  FileText,
-  BarChart3
+  UserCheck,
+  UserX,
+  AlertCircle,
+  BarChart3,
+  Activity
 } from "lucide-react";
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'customer' | 'technician' | 'admin';
+  created_at: string;
+}
+
+interface Booking {
+  id: string;
+  service_name: string;
+  user_name: string;
+  technician_name: string;
+  status: string;
+  scheduled_date: string;
+  price: number;
+  created_at: string;
+}
 
 interface TechnicianApplication {
   id: string;
-  first_name: string;
-  last_name: string;
+  name: string;
   email: string;
   phone: string;
   experience: string;
-  hourly_rate: number;
   specialties: string[];
-  status: 'pending' | 'reviewing' | 'approved' | 'rejected' | 'hired';
+  status: 'pending' | 'approved' | 'rejected';
   created_at: string;
-  admin_notes?: string;
-}
-
-interface DashboardStats {
-  totalUsers: number;
-  totalBookings: number;
-  totalRevenue: number;
-  pendingApplications: number;
-  activeTechnicians: number;
-  completedJobs: number;
 }
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
-  const { user, logout, isAuthenticated, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [users, setUsers] = useState<User[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [applications, setApplications] = useState<TechnicianApplication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalBookings: 0,
-    totalRevenue: 0,
-    pendingApplications: 0,
-    activeTechnicians: 0,
-    completedJobs: 0
-  });
-  const [selectedApplication, setSelectedApplication] = useState<TechnicianApplication | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
 
   // Check if user is admin
   useEffect(() => {
-    if (!isLoading && (!isAuthenticated || !user)) {
-      navigate("/auth");
-      return;
-    }
-
-    if (!isLoading && user?.role !== 'admin') {
+    if (user && user.role !== 'admin') {
       toast({
         title: "Access Denied",
         description: "You don't have permission to access the admin dashboard.",
-        variant: "destructive"
+        variant: "destructive",
       });
-      navigate("/dashboard");
-      return;
+      navigate('/dashboard');
     }
-  }, [user, isAuthenticated, isLoading, navigate, toast]);
+  }, [user, navigate, toast]);
 
-  // Load admin data
+  // Mock data for demonstration
   useEffect(() => {
-    if (user?.role === 'admin') {
-      loadAdminData();
-    }
-  }, [user]);
-
-  const loadAdminData = async () => {
-    try {
-      setLoading(true);
+    // Simulate loading data
+    setTimeout(() => {
+      setUsers([
+        { id: '1', email: 'john@example.com', name: 'John Doe', role: 'customer', created_at: '2024-01-15' },
+        { id: '2', email: 'jane@example.com', name: 'Jane Smith', role: 'technician', created_at: '2024-01-10' },
+        { id: '3', email: 'bob@example.com', name: 'Bob Johnson', role: 'customer', created_at: '2024-01-20' },
+      ]);
       
-      // Load technician applications
-      const applicationsResponse = await api.getTechnicianApplications();
-      if (applicationsResponse.success) {
-        setApplications(applicationsResponse.data || []);
-      }
-
-      // Load dashboard stats (mock data for now)
-      setStats({
-        totalUsers: 156,
-        totalBookings: 89,
-        totalRevenue: 15420.50,
-        pendingApplications: applicationsResponse.success ? (applicationsResponse.data || []).filter(app => app.status === 'pending').length : 0,
-        activeTechnicians: 12,
-        completedJobs: 67
-      });
-    } catch (error) {
-      console.error('Error loading admin data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load admin data.",
-        variant: "destructive"
-      });
-    } finally {
+      setBookings([
+        { id: '1', service_name: 'Plumbing Repair', user_name: 'John Doe', technician_name: 'Jane Smith', status: 'confirmed', scheduled_date: '2024-02-15', price: 150, created_at: '2024-01-25' },
+        { id: '2', service_name: 'Electrical Work', user_name: 'Bob Johnson', technician_name: 'Mike Wilson', status: 'pending', scheduled_date: '2024-02-20', price: 200, created_at: '2024-01-26' },
+      ]);
+      
+      setApplications([
+        { id: '1', name: 'Alice Brown', email: 'alice@example.com', phone: '+1234567890', experience: '5 years', specialties: ['Plumbing', 'Electrical'], status: 'pending', created_at: '2024-01-28' },
+        { id: '2', name: 'Charlie Davis', email: 'charlie@example.com', phone: '+1234567891', experience: '3 years', specialties: ['HVAC'], status: 'approved', created_at: '2024-01-25' },
+      ]);
+      
       setLoading(false);
-    }
-  };
-
-  const handleApplicationStatusUpdate = async (applicationId: string, status: string, notes?: string) => {
-    try {
-      const response = await api.updateTechnicianApplication(applicationId, {
-        status: status as any,
-        adminNotes: notes
-      });
-
-      if (response.success) {
-        toast({
-          title: "Application Updated",
-          description: `Application status updated to ${status}`,
-        });
-
-        // Refresh applications
-        loadAdminData();
-        setSelectedApplication(null);
-      } else {
-        toast({
-          title: "Error",
-          description: response.error || "Failed to update application",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update application status",
-        variant: "destructive"
-      });
-    }
-  };
+    }, 1000);
+  }, []);
 
   const handleLogout = async () => {
     await logout();
+    navigate('/');
+  };
+
+  const handleApplicationAction = (applicationId: string, action: 'approve' | 'reject') => {
+    setApplications(prev => 
+      prev.map(app => 
+        app.id === applicationId 
+          ? { ...app, status: action === 'approve' ? 'approved' : 'rejected' }
+          : app
+      )
+    );
+    
     toast({
-      title: "Logged out",
-      description: "You have been successfully logged out",
+      title: `Application ${action === 'approve' ? 'Approved' : 'Rejected'}`,
+      description: `The technician application has been ${action === 'approve' ? 'approved' : 'rejected'}.`,
     });
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "approved": return "bg-success text-success-foreground";
-      case "hired": return "bg-primary text-primary-foreground";
-      case "rejected": return "bg-destructive text-destructive-foreground";
-      case "reviewing": return "bg-warning text-warning-foreground";
-      case "pending": return "bg-muted text-muted-foreground";
-      default: return "bg-muted text-muted-foreground";
+      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'approved': return 'bg-green-100 text-green-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "approved": return <CheckCircle className="w-4 h-4" />;
-      case "hired": return <UserPlus className="w-4 h-4" />;
-      case "rejected": return <XCircle className="w-4 h-4" />;
-      case "reviewing": return <Eye className="w-4 h-4" />;
-      case "pending": return <Clock className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
-    }
-  };
-
-  const filteredApplications = applications.filter(app => {
-    const matchesStatus = statusFilter === "all" || app.status === statusFilter;
-    const matchesSearch = app.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         app.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         app.email.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <div className="text-center space-y-4">
+          <Activity className="w-8 h-8 animate-spin mx-auto" />
           <p>Loading admin dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (!user || user.role !== 'admin') {
-    return null; // Will redirect in useEffect
-  }
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b border-border">
+      <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-2xl flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-primary">Admin Dashboard</span>
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <Settings className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                <p className="text-muted-foreground">Manage your platform</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-4">
               <span className="text-sm text-muted-foreground">
-                Welcome, {user.name}
+                Welcome, {user?.name}
               </span>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
@@ -251,132 +176,247 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="applications">Applications</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="bookings">Bookings</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="overview" className="flex items-center space-x-2">
+              <BarChart3 className="w-4 h-4" />
+              <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center space-x-2">
+              <Users className="w-4 h-4" />
+              <span>Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="bookings" className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4" />
+              <span>Bookings</span>
+            </TabsTrigger>
+            <TabsTrigger value="applications" className="flex items-center space-x-2">
+              <FileText className="w-4 h-4" />
+              <span>Applications</span>
+            </TabsTrigger>
+            <TabsTrigger value="technicians" className="flex items-center space-x-2">
+              <Wrench className="w-4 h-4" />
+              <span>Technicians</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Users</CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                  <div className="text-2xl font-bold">{users.length}</div>
                   <p className="text-xs text-muted-foreground">
-                    +12% from last month
+                    +20.1% from last month
                   </p>
                 </CardContent>
               </Card>
-
+              
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                  <CardTitle className="text-sm font-medium">Active Bookings</CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{bookings.length}</div>
+                  <p className="text-xs text-muted-foreground">
+                    +12.5% from last month
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Revenue</CardTitle>
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${stats.totalRevenue.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">$2,350</div>
                   <p className="text-xs text-muted-foreground">
-                    +8% from last month
+                    +8.2% from last month
                   </p>
                 </CardContent>
               </Card>
-
+              
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Pending Applications</CardTitle>
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.pendingApplications}</div>
+                  <div className="text-2xl font-bold">
+                    {applications.filter(app => app.status === 'pending').length}
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Require review
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Technicians</CardTitle>
-                  <Wrench className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.activeTechnicians}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Available for jobs
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalBookings}</div>
-                  <p className="text-xs text-muted-foreground">
-                    +5% from last month
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Completed Jobs</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.completedJobs}</div>
-                  <p className="text-xs text-muted-foreground">
-                    This month
+                    Need review
                   </p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Recent Activity */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {bookings.slice(0, 5).map((booking) => (
+                    <div key={booking.id} className="flex items-center space-x-4">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{booking.service_name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {booking.user_name} • {booking.scheduled_date}
+                        </p>
+                      </div>
+                      <Badge className={getStatusColor(booking.status)}>
+                        {booking.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Customers</span>
+                      <span className="text-sm font-medium">
+                        {users.filter(u => u.role === 'customer').length}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Technicians</span>
+                      <span className="text-sm font-medium">
+                        {users.filter(u => u.role === 'technician').length}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Admins</span>
+                      <span className="text-sm font-medium">
+                        {users.filter(u => u.role === 'admin').length}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Users Tab */}
+          <TabsContent value="users" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">User Management</h2>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add User
+              </Button>
+            </div>
+            
             <Card>
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>All Users</CardTitle>
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm">
+                      <Search className="w-4 h-4 mr-2" />
+                      Search
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Filter className="w-4 h-4 mr-2" />
+                      Filter
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">New technician application received</p>
-                      <p className="text-xs text-muted-foreground">John Doe applied for Computer Repair position</p>
+                  {users.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Users className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{user.name}</p>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                          {user.role}
+                        </Badge>
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">2 hours ago</span>
-                  </div>
-                  <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
-                    <div className="w-2 h-2 bg-success rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Booking completed</p>
-                      <p className="text-xs text-muted-foreground">Computer repair job completed by Sarah Johnson</p>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Bookings Tab */}
+          <TabsContent value="bookings" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Booking Management</h2>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Booking
+              </Button>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>All Bookings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {bookings.map((booking) => (
+                    <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Calendar className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{booking.service_name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {booking.user_name} • {booking.technician_name}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {booking.scheduled_date} • ${booking.price}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={getStatusColor(booking.status)}>
+                          {booking.status}
+                        </Badge>
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">4 hours ago</span>
-                  </div>
-                  <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
-                    <div className="w-2 h-2 bg-warning rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">New user registration</p>
-                      <p className="text-xs text-muted-foreground">New customer account created</p>
-                    </div>
-                    <span className="text-xs text-muted-foreground">6 hours ago</span>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -385,231 +425,116 @@ export default function AdminDashboard() {
           {/* Applications Tab */}
           <TabsContent value="applications" className="space-y-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search applications..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 w-64"
-                  />
-                </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="reviewing">Reviewing</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="hired">Hired</SelectItem>
-                  </SelectContent>
-                </Select>
+              <h2 className="text-xl font-semibold">Technician Applications</h2>
+              <div className="flex items-center space-x-2">
+                <Badge variant="outline">
+                  {applications.filter(app => app.status === 'pending').length} Pending
+                </Badge>
               </div>
-              <Button>
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
             </div>
-
-            <div className="grid gap-4">
-              {filteredApplications.map((application) => (
-                <Card key={application.id} className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => setSelectedApplication(application)}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                          <UserPlus className="w-6 h-6 text-primary" />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Review Applications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {applications.map((application) => (
+                    <div key={application.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-green-600" />
                         </div>
                         <div>
-                          <h3 className="font-semibold">
-                            {application.first_name} {application.last_name}
-                          </h3>
+                          <p className="font-medium">{application.name}</p>
                           <p className="text-sm text-muted-foreground">{application.email}</p>
-                          <p className="text-sm text-muted-foreground">{application.phone}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {application.experience} • {application.specialties.join(', ')}
+                          </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-sm font-medium">${application.hourly_rate}/hr</p>
-                          <p className="text-xs text-muted-foreground">{application.experience}</p>
-                        </div>
+                      <div className="flex items-center space-x-2">
                         <Badge className={getStatusColor(application.status)}>
-                          {getStatusIcon(application.status)}
-                          <span className="ml-1 capitalize">{application.status}</span>
+                          {application.status}
                         </Badge>
+                        {application.status === 'pending' && (
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleApplicationAction(application.id, 'approve')}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleApplicationAction(application.id, 'reject')}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {application.specialties.map((specialty, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {specialty}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Technicians Tab */}
+          <TabsContent value="technicians" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Technician Management</h2>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Technician
+              </Button>
             </div>
-
-            {filteredApplications.length === 0 && (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No applications found</h3>
-                  <p className="text-muted-foreground">
-                    {searchQuery || statusFilter !== "all" 
-                      ? "Try adjusting your search or filter criteria."
-                      : "No technician applications have been submitted yet."}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* Users Tab */}
-          <TabsContent value="users" className="space-y-6">
+            
             <Card>
               <CardHeader>
-                <CardTitle>User Management</CardTitle>
+                <CardTitle>All Technicians</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  User management features coming soon. This will include:
-                </p>
-                <ul className="mt-4 space-y-2 text-sm">
-                  <li>• View all registered users</li>
-                  <li>• Manage user roles and permissions</li>
-                  <li>• User activity monitoring</li>
-                  <li>• Account suspension/activation</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Bookings Tab */}
-          <TabsContent value="bookings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Booking Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Booking management features coming soon. This will include:
-                </p>
-                <ul className="mt-4 space-y-2 text-sm">
-                  <li>• View all bookings and their status</li>
-                  <li>• Assign technicians to bookings</li>
-                  <li>• Monitor booking progress</li>
-                  <li>• Generate booking reports</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Admin Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Admin settings features coming soon. This will include:
-                </p>
-                <ul className="mt-4 space-y-2 text-sm">
-                  <li>• System configuration</li>
-                  <li>• Email templates</li>
-                  <li>• Notification settings</li>
-                  <li>• Security settings</li>
-                </ul>
+                <div className="space-y-4">
+                  {users.filter(u => u.role === 'technician').map((technician) => (
+                    <div key={technician.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                          <Wrench className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{technician.name}</p>
+                          <p className="text-sm text-muted-foreground">{technician.email}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Active • 4.8★ rating
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary">Active</Badge>
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Application Detail Modal */}
-      {selectedApplication && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">
-                  {selectedApplication.first_name} {selectedApplication.last_name}
-                </h2>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedApplication(null)}>
-                  <XCircle className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6 mb-6">
-                <div>
-                  <Label>Email</Label>
-                  <p className="text-sm">{selectedApplication.email}</p>
-                </div>
-                <div>
-                  <Label>Phone</Label>
-                  <p className="text-sm">{selectedApplication.phone}</p>
-                </div>
-                <div>
-                  <Label>Experience</Label>
-                  <p className="text-sm">{selectedApplication.experience}</p>
-                </div>
-                <div>
-                  <Label>Hourly Rate</Label>
-                  <p className="text-sm">${selectedApplication.hourly_rate}/hr</p>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <Label>Specialties</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedApplication.specialties.map((specialty, index) => (
-                    <Badge key={index} variant="secondary">
-                      {specialty}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <Label>Admin Notes</Label>
-                <Textarea
-                  placeholder="Add admin notes..."
-                  defaultValue={selectedApplication.admin_notes || ""}
-                  className="mt-2"
-                />
-              </div>
-
-              <div className="flex items-center gap-4">
-                <Label>Status</Label>
-                <Select
-                  defaultValue={selectedApplication.status}
-                  onValueChange={(value) => {
-                    handleApplicationStatusUpdate(selectedApplication.id, value);
-                  }}
-                >
-                  <SelectTrigger className="w-48">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="reviewing">Reviewing</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="hired">Hired</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

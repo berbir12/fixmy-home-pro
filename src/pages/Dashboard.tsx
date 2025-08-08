@@ -1,176 +1,152 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
-import { useBookings } from "@/hooks/useBookings";
-import { usePayments } from "@/hooks/usePayments";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  User, 
-  Calendar, 
-  CreditCard, 
-  Settings, 
-  Bell, 
-  MapPin, 
-  Clock, 
-  Star,
-  MessageCircle,
-  Phone,
-  Wrench,
-  CheckCircle,
-  AlertCircle,
-  ArrowRight,
-  Plus,
-  Filter,
-  Search,
-  Download,
-  Edit,
-  Trash2,
+import {
+  User,
+  Calendar,
+  Settings,
   LogOut,
+  Plus,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Star,
+  MapPin,
+  Phone,
+  Mail,
+  Edit,
+  Wrench,
+  BookOpen,
+  HelpCircle,
+  Bell,
+  CreditCard,
   Shield
 } from "lucide-react";
 
+interface Booking {
+  id: string;
+  service_name: string;
+  technician_name: string;
+  status: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  address: string;
+  price: number;
+  rating?: number;
+  review?: string;
+  created_at: string;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
-  const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth();
-  const { bookings, isLoading: bookingsLoading, cancelBooking, rateBooking } = useBookings();
-  const { payments, isLoading: paymentsLoading } = usePayments();
-  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Handle URL parameter for tab
+  // Check if user is not admin (should be redirected to admin dashboard)
   useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam && ['overview', 'bookings', 'payments', 'profile'].includes(tabParam)) {
-      setActiveTab(tabParam);
+    if (user && user.role === 'admin') {
+      navigate('/admin');
+      return;
     }
-  }, [searchParams]);
+  }, [user, navigate]);
 
-  // Redirect if not authenticated
-  if (!authLoading && !isAuthenticated) {
-    navigate("/auth");
-    return null;
-  }
+  // Mock data for demonstration
+  useEffect(() => {
+    setTimeout(() => {
+      setBookings([
+        {
+          id: '1',
+          service_name: 'Plumbing Repair',
+          technician_name: 'Jane Smith',
+          status: 'confirmed',
+          scheduled_date: '2024-02-15',
+          scheduled_time: '10:00 AM',
+          address: '123 Main St, City, State',
+          price: 150,
+          rating: 5,
+          review: 'Excellent service!',
+          created_at: '2024-01-25'
+        },
+        {
+          id: '2',
+          service_name: 'Electrical Work',
+          technician_name: 'Mike Wilson',
+          status: 'pending',
+          scheduled_date: '2024-02-20',
+          scheduled_time: '2:00 PM',
+          address: '456 Oak Ave, City, State',
+          price: 200,
+          created_at: '2024-01-26'
+        }
+      ]);
+      setLoading(false);
+    }, 1000);
+  }, []);
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed": return "bg-success text-success-foreground";
-      case "scheduled": 
-      case "confirmed": return "bg-primary text-primary-foreground";
-      case "cancelled": return "bg-destructive text-destructive-foreground";
-      case "pending": 
-      case "in_progress": return "bg-warning text-warning-foreground";
-      default: return "bg-muted text-muted-foreground";
+      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'completed': return 'bg-blue-100 text-blue-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "completed": return <CheckCircle className="w-4 h-4" />;
-      case "scheduled": 
-      case "confirmed": return <Clock className="w-4 h-4" />;
-      case "cancelled": return <AlertCircle className="w-4 h-4" />;
-      case "pending": 
-      case "in_progress": return <Wrench className="w-4 h-4" />;
+      case 'confirmed': return <CheckCircle className="w-4 h-4" />;
+      case 'pending': return <Clock className="w-4 h-4" />;
+      case 'completed': return <CheckCircle className="w-4 h-4" />;
+      case 'cancelled': return <XCircle className="w-4 h-4" />;
       default: return <Clock className="w-4 h-4" />;
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out",
-    });
-  };
-
-  const handleAdminDashboard = () => {
-    navigate("/admin");
-  };
-
-  const handleCancelBooking = async (bookingId: string) => {
-    try {
-      await cancelBooking(bookingId);
-      toast({
-        title: "Booking Cancelled",
-        description: "Your booking has been cancelled successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to cancel booking",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRateBooking = async (bookingId: string, rating: number, review?: string) => {
-    try {
-      await rateBooking({ bookingId, rating, review });
-      toast({
-        title: "Rating Submitted",
-        description: "Thank you for your feedback!",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to submit rating",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Calculate stats
-  const totalBookings = bookings.length;
-  const completedBookings = bookings.filter(b => b.status === 'completed').length;
-  const averageRating = bookings
-    .filter(b => b.rating)
-    .reduce((sum, b) => sum + (b.rating || 0), 0) / 
-    bookings.filter(b => b.rating).length || 0;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p>Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b border-border">
+      <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-2xl flex items-center justify-center">
-                <Wrench className="w-5 h-5 text-white" />
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <User className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-primary">FixNow</span>
+              <div>
+                <h1 className="text-2xl font-bold">My Account</h1>
+                <p className="text-muted-foreground">Manage your bookings and profile</p>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              {user?.role === 'admin' && (
-                <Button variant="ghost" size="sm" onClick={handleAdminDashboard}>
-                  <Shield className="w-4 h-4 mr-2" />
-                  Admin
-                </Button>
-              )}
-              <Button variant="ghost" size="sm" onClick={() => navigate("/chat")}>
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Chat
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
-                <User className="w-4 h-4 mr-2" />
-                Home
+            <div className="flex items-center space-x-4">
+              <Button variant="outline" size="sm">
+                <Bell className="w-4 h-4 mr-2" />
+                Notifications
               </Button>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
@@ -179,359 +155,335 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        {/* User Welcome */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Avatar className="w-16 h-16">
-              <AvatarImage src={user?.avatar} />
-              <AvatarFallback className="text-lg">
-                {user?.name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-2xl font-bold">Welcome back, {user?.name}!</h1>
-              <p className="text-muted-foreground">{user?.email}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="bookings">Bookings</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="bookings">My Bookings</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="support">Support</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Bookings</p>
-                      <p className="text-2xl font-bold">{totalBookings}</p>
-                    </div>
-                    <Calendar className="w-8 h-8 text-primary" />
-                  </div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{bookings.length}</div>
+                  <p className="text-xs text-muted-foreground">
+                    All time bookings
+                  </p>
                 </CardContent>
               </Card>
-
+              
               <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                      <p className="text-2xl font-bold">{completedBookings}</p>
-                    </div>
-                    <CheckCircle className="w-8 h-8 text-success" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Active Bookings</CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {bookings.filter(b => b.status === 'confirmed' || b.status === 'pending').length}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Currently scheduled
+                  </p>
                 </CardContent>
               </Card>
-
+              
               <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Avg Rating</p>
-                      <p className="text-2xl font-bold">{averageRating.toFixed(1)}</p>
-                    </div>
-                    <Star className="w-8 h-8 text-yellow-500" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    ${bookings.reduce((sum, booking) => sum + booking.price, 0)}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    All time spending
+                  </p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {bookingsLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p>Loading bookings...</p>
-                  </div>
-                ) : bookings.length > 0 ? (
-                  <div className="space-y-4">
-                    {bookings.slice(0, 3).map((booking) => (
-                      <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Wrench className="w-5 h-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{booking.serviceName}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {booking.scheduledDate} at {booking.scheduledTime}
-                            </p>
-                          </div>
-                        </div>
-                        <Badge className={getStatusColor(booking.status)}>
-                          {booking.status}
-                        </Badge>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Bookings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {bookings.slice(0, 3).map((booking) => (
+                    <div key={booking.id} className="flex items-center space-x-4 p-3 border rounded-lg">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Wrench className="w-5 h-5 text-blue-600" />
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No bookings yet</p>
-                    <Button className="mt-4" onClick={() => navigate("/services")}>
-                      Book Your First Service
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      <div className="flex-1">
+                        <p className="font-medium">{booking.service_name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {booking.scheduled_date} at {booking.scheduled_time}
+                        </p>
+                      </div>
+                      <Badge className={getStatusColor(booking.status)}>
+                        {getStatusIcon(booking.status)}
+                        <span className="ml-1">{booking.status}</span>
+                      </Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Book New Service
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Update Profile
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <HelpCircle className="w-4 h-4 mr-2" />
+                    Get Help
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Privacy Settings
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Bookings Tab */}
           <TabsContent value="bookings" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">My Bookings</h2>
+              <Button onClick={() => navigate('/services')}>
+                <Plus className="w-4 h-4 mr-2" />
+                Book New Service
+              </Button>
+            </div>
+            
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Booking History</CardTitle>
-                  <Button onClick={() => navigate("/services")}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Booking
-                  </Button>
-                </div>
+                <CardTitle>All Bookings</CardTitle>
               </CardHeader>
               <CardContent>
-                {bookingsLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p>Loading bookings...</p>
-                  </div>
-                ) : bookings.length > 0 ? (
-                  <div className="space-y-4">
-                    {bookings.map((booking) => (
-                      <div key={booking.id} className="border rounded-lg p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-4">
-                            <Avatar className="w-12 h-12">
-                              <AvatarImage src={booking.technicianAvatar} />
-                              <AvatarFallback>
-                                {booking.technicianName?.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h3 className="font-semibold">{booking.serviceName}</h3>
-                              <p className="text-sm text-muted-foreground">
-                                Technician: {booking.technicianName}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {booking.scheduledDate} at {booking.scheduledTime}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className={getStatusColor(booking.status)}>
-                              {getStatusIcon(booking.status)}
-                              {booking.status}
-                            </Badge>
-                            <span className="font-semibold">${booking.price}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              {booking.address}
-                            </div>
-                            {booking.rating && (
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 text-yellow-500" />
-                                {booking.rating}/5
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {booking.status === 'scheduled' && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleCancelBooking(booking.id)}
-                              >
-                                Cancel
-                              </Button>
-                            )}
-                            {booking.status === 'completed' && !booking.rating && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleRateBooking(booking.id, 5)}
-                              >
-                                Rate
-                              </Button>
-                            )}
-                            <Button variant="outline" size="sm">
-                              <MessageCircle className="w-4 h-4 mr-2" />
-                              Chat
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No bookings yet</p>
-                    <Button className="mt-4" onClick={() => navigate("/services")}>
-                      Book Your First Service
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Payments Tab */}
-          <TabsContent value="payments" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {paymentsLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p>Loading payments...</p>
-                  </div>
-                ) : payments.length > 0 ? (
-                  <div className="space-y-4">
-                    {payments.map((payment) => (
-                      <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                            <CreditCard className="w-5 h-5 text-primary" />
+                <div className="space-y-4">
+                  {bookings.map((booking) => (
+                    <div key={booking.id} className="border rounded-lg p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <Wrench className="w-6 h-6 text-blue-600" />
                           </div>
                           <div>
-                            <p className="font-medium">${payment.amount}</p>
+                            <h3 className="font-semibold text-lg">{booking.service_name}</h3>
                             <p className="text-sm text-muted-foreground">
-                              {payment.method} • {new Date(payment.createdAt).toLocaleDateString()}
+                              Technician: {booking.technician_name}
                             </p>
                           </div>
                         </div>
-                        <Badge className={getStatusColor(payment.status)}>
-                          {payment.status}
+                        <Badge className={getStatusColor(booking.status)}>
+                          {getStatusIcon(booking.status)}
+                          <span className="ml-1">{booking.status}</span>
                         </Badge>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No payments yet</p>
-                  </div>
-                )}
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">
+                            {booking.scheduled_date} at {booking.scheduled_time}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">{booking.address}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <CreditCard className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">${booking.price}</span>
+                        </div>
+                        {booking.rating && (
+                          <div className="flex items-center space-x-2">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <span className="text-sm">{booking.rating}/5 stars</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {booking.review && (
+                        <div className="bg-muted/50 p-3 rounded-lg">
+                          <p className="text-sm italic">"{booking.review}"</p>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center space-x-2 mt-4">
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4 mr-1" />
+                          Reschedule
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Phone className="w-4 h-4 mr-1" />
+                          Contact
+                        </Button>
+                        {booking.status === 'completed' && !booking.rating && (
+                          <Button variant="outline" size="sm">
+                            <Star className="w-4 h-4 mr-1" />
+                            Rate Service
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <Avatar className="w-20 h-20">
-                    <AvatarImage src={user?.avatar} />
-                    <AvatarFallback className="text-xl">
-                      {user?.name?.charAt(0) || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="text-lg font-semibold">{user?.name}</h3>
-                    <p className="text-muted-foreground">{user?.email}</p>
-                    {user?.phone && (
-                      <p className="text-muted-foreground">{user.phone}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-medium mb-2">Saved Addresses</h4>
-                    {user?.addresses && user.addresses.length > 0 ? (
-                      <div className="space-y-2">
-                        {user.addresses.map((address) => (
-                          <div key={address.id} className="p-3 border rounded-lg">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="font-medium">{address.type}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {address.address}, {address.city}, {address.state} {address.zipCode}
-                                </p>
-                              </div>
-                              {address.isDefault && (
-                                <Badge variant="secondary">Default</Badge>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground">No saved addresses</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium mb-2">Preferences</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Email Notifications</span>
-                        <input
-                          type="checkbox"
-                          checked={user?.preferences?.notifications.email}
-                          className="rounded"
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">SMS Notifications</span>
-                        <input
-                          type="checkbox"
-                          checked={user?.preferences?.notifications.sms}
-                          className="rounded"
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Push Notifications</span>
-                        <input
-                          type="checkbox"
-                          checked={user?.preferences?.notifications.push}
-                          className="rounded"
-                        />
-                      </div>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Profile Settings</h2>
+              <Button variant="outline">
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Personal Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="w-16 h-16">
+                      <AvatarImage src={user?.avatar} />
+                      <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-semibold">{user?.name}</h3>
+                      <p className="text-sm text-muted-foreground">{user?.email}</p>
                     </div>
                   </div>
-                </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <Mail className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">{user?.email}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Phone className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">{user?.phone || 'Not provided'}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm capitalize">{user?.role}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                <div className="flex gap-4">
-                  <Button>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Profile
+              <Card>
+                <CardHeader>
+                  <CardTitle>Account Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Change Password
                   </Button>
-                  <Button variant="outline">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Data
+                  <Button className="w-full justify-start" variant="outline">
+                    <Bell className="w-4 h-4 mr-2" />
+                    Notification Preferences
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Privacy Settings
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Payment Methods
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Support Tab */}
+          <TabsContent value="support" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Support & Help</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contact Support</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <Phone className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="font-medium">Phone Support</p>
+                      <p className="text-sm text-muted-foreground">1-800-FIXNOW</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="font-medium">Email Support</p>
+                      <p className="text-sm text-muted-foreground">support@fixnow.com</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <HelpCircle className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="font-medium">Live Chat</p>
+                      <p className="text-sm text-muted-foreground">Available 24/7</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Help</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button className="w-full justify-start" variant="outline">
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    How to Book a Service
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Clock className="w-4 h-4 mr-2" />
+                    Reschedule a Booking
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Cancel a Booking
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Star className="w-4 h-4 mr-2" />
+                    Rate a Service
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
