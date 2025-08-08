@@ -1,11 +1,11 @@
 -- Create First Admin User
--- Run this after the fresh database setup
+-- Run this after setting up the new database schema
 
 -- First, check if your user exists in auth.users
 -- Replace 'your-email@example.com' with your actual email
 SELECT id, email, raw_user_meta_data 
 FROM auth.users 
-WHERE email = 'your-email@example.com';
+WHERE email = 'berbir901@gmail.com';
 
 -- If your user exists, insert them into the admins table
 -- Replace 'your-email@example.com' with your actual email
@@ -17,7 +17,7 @@ SELECT
     'admin' as role,
     true as is_super_admin
 FROM auth.users 
-WHERE email = 'your-email@example.com'
+WHERE email = 'berbir901@gmail.com'
 ON CONFLICT (id) DO UPDATE SET 
     role = 'admin',
     is_super_admin = true;

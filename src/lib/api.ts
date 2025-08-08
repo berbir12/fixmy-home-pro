@@ -1,122 +1,446 @@
-// API Types
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
+import { supabase } from './supabase';
 
 export interface User {
   id: string;
   email: string;
   name: string;
-  role?: 'customer' | 'technician' | 'admin';
+  role: 'admin' | 'customer' | 'technician';
   phone?: string;
   avatar?: string;
-  addresses: Address[];
-  preferences: UserPreferences;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface Address {
-  id: string;
-  type: 'home' | 'work' | 'other';
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  isDefault: boolean;
+export interface Admin extends User {
+  role: 'admin';
+  permissions: {
+    users: { view: boolean; edit: boolean; delete: boolean };
+    bookings: { view: boolean; edit: boolean; delete: boolean };
+    technicians: { view: boolean; edit: boolean; delete: boolean };
+    applications: { view: boolean; approve: boolean; reject: boolean };
+    reports: { view: boolean; export: boolean };
+    settings: { view: boolean; edit: boolean };
+  };
+  is_super_admin: boolean;
+  last_login?: string;
 }
 
-export interface UserPreferences {
-  notifications: {
-    email: boolean;
-    sms: boolean;
-    push: boolean;
+export interface Customer extends User {
+  role: 'customer';
+  addresses: any[];
+  preferences: {
+    notifications: { email: boolean; sms: boolean; push: boolean };
+    privacy: { shareLocation: boolean; shareContact: boolean };
   };
-  privacy: {
-    shareLocation: boolean;
-    shareContact: boolean;
-  };
+  total_spent: number;
+  loyalty_points: number;
+  preferred_technicians: string[];
+  is_verified: boolean;
+  last_login?: string;
+}
+
+export interface Technician extends User {
+  role: 'technician';
+  specialties: string[];
+  certifications: string[];
+  experience: string;
+  hourly_rate: number;
+  availability: any;
+  rating: number;
+  total_jobs: number;
+  is_active: boolean;
+  skills: string[];
+  languages: string[];
+  vehicle_info?: any;
+  is_verified: boolean;
+  application_status: 'pending' | 'approved' | 'rejected';
+  admin_notes?: string;
+  last_login?: string;
 }
 
 export interface Booking {
   id: string;
-  serviceId: string;
-  serviceName: string;
-  technicianId: string;
-  technicianName: string;
-  technicianAvatar?: string;
-  userId: string;
+  service_id: string;
+  service_name: string;
+  technician_id: string;
+  technician_name: string;
+  technician_avatar?: string;
+  customer_id: string;
+  customer_name: string;
   status: 'pending' | 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
-  scheduledDate: string;
-  scheduledTime: string;
+  scheduled_date: string;
+  scheduled_time: string;
   address: string;
   description: string;
   price: number;
   rating?: number;
   review?: string;
-  createdAt: string;
-  updatedAt: string;
+  admin_notes?: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface Payment {
-  id: string;
-  bookingId: string;
-  amount: number;
-  currency: string;
-  method: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay';
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
-  transactionId?: string;
-  createdAt: string;
-}
-
-export interface ChatMessage {
-  id: string;
-  chatId: string;
-  senderId: string;
-  senderName: string;
-  senderType: 'user' | 'technician' | 'support' | 'ai';
-  content: string;
-  type: 'text' | 'image' | 'file' | 'location';
-  timestamp: string;
-  status: 'sent' | 'delivered' | 'read';
-}
-
-export interface ChatContact {
+export interface TechnicianApplication {
   id: string;
   name: string;
-  avatar?: string;
-  type: 'technician' | 'support' | 'ai';
-  lastMessage?: string;
-  lastMessageTime?: string;
-  unreadCount: number;
-  isOnline: boolean;
+  email: string;
+  phone: string;
+  experience: string;
+  specialties: string[];
+  certifications: string[];
+  hourly_rate: number;
+  resume_url?: string;
+  cover_letter?: string;
+  status: 'pending' | 'reviewing' | 'approved' | 'rejected';
+  admin_notes?: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
-// Import Supabase API client
-import { SupabaseApiClient } from './supabaseApi';
-
-// Export Supabase API client as the only API client
-export const api = new SupabaseApiClient();
-
-// Debug logging to confirm Supabase is being used
-console.log('🔗 API Client: Using SupabaseApiClient');
-console.log('🔗 Supabase URL:', import.meta.env.VITE_SUPABASE_URL ? 'Configured' : 'Not configured');
-console.log('🔗 Supabase Anon Key:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Configured' : 'Not configured');
-
-// Additional debugging for environment variables
-if (import.meta.env.VITE_SUPABASE_URL) {
-  console.log('🔗 Supabase URL (first 20 chars):', import.meta.env.VITE_SUPABASE_URL.substring(0, 20) + '...');
-}
-if (import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  console.log('🔗 Supabase Key (first 20 chars):', import.meta.env.VITE_SUPABASE_ANON_KEY.substring(0, 20) + '...');
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
 }
 
-// Check if environment variables are missing
-if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  console.error('❌ Missing Supabase environment variables!');
-  console.error('❌ VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL);
-  console.error('❌ VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Missing');
+class Api {
+  // Authentication methods
+  async login(email: string, password: string): Promise<ApiResponse<{ user: Admin | Customer | Technician }>> {
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        return { success: false, error: 'Login failed' };
+      }
+
+      // Check which table the user belongs to
+      const user = await this.getCurrentUser();
+      
+      if (!user.success || !user.data) {
+        return { success: false, error: 'User not found in database' };
+      }
+
+      return { success: true, data: { user: user.data } };
+    } catch (error: any) {
+      console.error('Login error:', error);
+      return { success: false, error: error.message || 'Login failed' };
+    }
+  }
+
+  async register(userData: {
+    email: string;
+    password: string;
+    name: string;
+    phone?: string;
+  }): Promise<ApiResponse<{ user: Customer; requiresEmailConfirmation?: boolean }>> {
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            name: userData.name,
+            phone: userData.phone,
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        return { success: false, error: 'Registration failed' };
+      }
+
+      // Create customer record
+      const { error: customerError } = await supabase
+        .from('customers')
+        .insert({
+          id: authData.user.id,
+          email: userData.email,
+          name: userData.name,
+          phone: userData.phone,
+          role: 'customer',
+        });
+
+      if (customerError) throw customerError;
+
+      const customer: Customer = {
+        id: authData.user.id,
+        email: userData.email,
+        name: userData.name,
+        phone: userData.phone,
+        role: 'customer',
+        addresses: [],
+        preferences: {
+          notifications: { email: true, sms: true, push: true },
+          privacy: { shareLocation: false, shareContact: false },
+        },
+        total_spent: 0,
+        loyalty_points: 0,
+        preferred_technicians: [],
+        is_verified: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      return {
+        success: true,
+        data: {
+          user: customer,
+          requiresEmailConfirmation: authData.user.email_confirmed_at === null,
+        },
+      };
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      return { success: false, error: error.message || 'Registration failed' };
+    }
+  }
+
+  async logout(): Promise<ApiResponse<void>> {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      return { success: true };
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      return { success: false, error: error.message || 'Logout failed' };
+    }
+  }
+
+  async getCurrentUser(): Promise<ApiResponse<Admin | Customer | Technician>> {
+    try {
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authUser) {
+        return { success: false, error: 'Not authenticated' };
+      }
+
+      // Check admins table first
+      const { data: admin, error: adminError } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (admin && !adminError) {
+        return { success: true, data: admin as Admin };
+      }
+
+      // Check customers table
+      const { data: customer, error: customerError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (customer && !customerError) {
+        return { success: true, data: customer as Customer };
+      }
+
+      // Check technicians table
+      const { data: technician, error: technicianError } = await supabase
+        .from('technicians')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (technician && !technicianError) {
+        return { success: true, data: technician as Technician };
+      }
+
+      return { success: false, error: 'User not found in database' };
+    } catch (error: any) {
+      console.error('Get current user error:', error);
+      return { success: false, error: error.message || 'Failed to get user' };
+    }
+  }
+
+  async updateProfile(userData: Partial<Admin | Customer | Technician>): Promise<ApiResponse<Admin | Customer | Technician>> {
+    try {
+      const currentUser = await this.getCurrentUser();
+      if (!currentUser.success || !currentUser.data) {
+        return { success: false, error: 'User not authenticated' };
+      }
+
+      const userId = currentUser.data.id;
+      const userRole = currentUser.data.role;
+
+      let updateResult;
+      let error;
+
+      switch (userRole) {
+        case 'admin':
+          ({ data: updateResult, error } = await supabase
+            .from('admins')
+            .update(userData)
+            .eq('id', userId)
+            .select()
+            .single());
+          break;
+        case 'customer':
+          ({ data: updateResult, error } = await supabase
+            .from('customers')
+            .update(userData)
+            .eq('id', userId)
+            .select()
+            .single());
+          break;
+        case 'technician':
+          ({ data: updateResult, error } = await supabase
+            .from('technicians')
+            .update(userData)
+            .eq('id', userId)
+            .select()
+            .single());
+          break;
+        default:
+          return { success: false, error: 'Invalid user role' };
+      }
+
+      if (error) throw error;
+
+      return { success: true, data: updateResult as Admin | Customer | Technician };
+    } catch (error: any) {
+      console.error('Update profile error:', error);
+      return { success: false, error: error.message || 'Failed to update profile' };
+    }
+  }
+
+  // Admin-specific methods
+  async getAllUsers(): Promise<ApiResponse<(Admin | Customer | Technician)[]>> {
+    try {
+      const [adminsResult, customersResult, techniciansResult] = await Promise.all([
+        supabase.from('admins').select('*'),
+        supabase.from('customers').select('*'),
+        supabase.from('technicians').select('*'),
+      ]);
+
+      const users = [
+        ...(adminsResult.data || []),
+        ...(customersResult.data || []),
+        ...(techniciansResult.data || []),
+      ];
+
+      return { success: true, data: users };
+    } catch (error: any) {
+      console.error('Get all users error:', error);
+      return { success: false, error: error.message || 'Failed to get users' };
+    }
+  }
+
+  async getAllBookings(): Promise<ApiResponse<Booking[]>> {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return { success: true, data: data || [] };
+    } catch (error: any) {
+      console.error('Get all bookings error:', error);
+      return { success: false, error: error.message || 'Failed to get bookings' };
+    }
+  }
+
+  async getTechnicianApplications(): Promise<ApiResponse<TechnicianApplication[]>> {
+    try {
+      const { data, error } = await supabase
+        .from('technician_applications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return { success: true, data: data || [] };
+    } catch (error: any) {
+      console.error('Get technician applications error:', error);
+      return { success: false, error: error.message || 'Failed to get applications' };
+    }
+  }
+
+  async updateTechnicianApplication(
+    applicationId: string,
+    updates: Partial<TechnicianApplication>
+  ): Promise<ApiResponse<TechnicianApplication>> {
+    try {
+      const { data, error } = await supabase
+        .from('technician_applications')
+        .update(updates)
+        .eq('id', applicationId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Update technician application error:', error);
+      return { success: false, error: error.message || 'Failed to update application' };
+    }
+  }
+
+  // Customer-specific methods
+  async getCustomerBookings(customerId: string): Promise<ApiResponse<Booking[]>> {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('customer_id', customerId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return { success: true, data: data || [] };
+    } catch (error: any) {
+      console.error('Get customer bookings error:', error);
+      return { success: false, error: error.message || 'Failed to get bookings' };
+    }
+  }
+
+  // Utility methods
+  async sendOtp(email: string): Promise<ApiResponse<void>> {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth`,
+        },
+      });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('Send OTP error:', error);
+      return { success: false, error: error.message || 'Failed to send OTP' };
+    }
+  }
+
+  async verifyOtp(email: string, token: string): Promise<ApiResponse<void>> {
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
+      });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('Verify OTP error:', error);
+      return { success: false, error: error.message || 'Failed to verify OTP' };
+    }
+  }
 }
+
+export const api = new Api();
