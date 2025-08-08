@@ -7,6 +7,11 @@ export interface User {
   role: 'admin' | 'customer' | 'technician';
   phone?: string;
   avatar?: string;
+  addresses?: any[];
+  preferences?: {
+    notifications: { email: boolean; sms: boolean; push: boolean };
+    privacy: { shareLocation: boolean; shareContact: boolean };
+  };
   created_at: string;
   updated_at: string;
 }
@@ -95,6 +100,43 @@ export interface TechnicianApplication {
   admin_notes?: string;
   reviewed_by?: string;
   reviewed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Payment {
+  id: string;
+  booking_id: string;
+  amount: number;
+  currency: string;
+  method: 'credit_card' | 'debit_card' | 'paypal' | 'cash' | 'bank_transfer';
+  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  transaction_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  chat_id: string;
+  sender_id: string;
+  sender_name: string;
+  sender_type: 'user' | 'technician' | 'admin';
+  content: string;
+  type: 'text' | 'image' | 'file' | 'location';
+  timestamp: string;
+  status: 'sent' | 'delivered' | 'read';
+  created_at: string;
+}
+
+export interface ChatContact {
+  id: string;
+  user_id: string;
+  technician_id: string;
+  last_message?: string;
+  last_message_time?: string;
+  unread_count: number;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -463,6 +505,24 @@ class Api {
     } catch (error: any) {
       console.error('Get customer bookings error:', error);
       return { success: false, error: error.message || 'Failed to get bookings' };
+    }
+  }
+
+  async updateBooking(bookingId: string, updates: Partial<Booking>): Promise<ApiResponse<Booking>> {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .update(updates)
+        .eq('id', bookingId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Update booking error:', error);
+      return { success: false, error: error.message || 'Failed to update booking' };
     }
   }
 
