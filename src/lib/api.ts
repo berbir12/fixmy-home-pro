@@ -137,7 +137,7 @@ class Api {
   async register(userData: {
     email: string;
     password: string;
-    name: string;
+  name: string;
     phone?: string;
   }): Promise<ApiResponse<{ user: Customer; requiresEmailConfirmation?: boolean }>> {
     try {
