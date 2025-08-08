@@ -1,12 +1,12 @@
 # 🔧 Fixing Supabase Email Confirmation Issue
 
 ## Problem
-You're getting this error when trying to register:
+You're getting this error when trying to login:
 ```
-http://localhost:3000/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired
+AuthApiError: Email not confirmed
 ```
 
-This happens because Supabase requires email confirmation by default, but the confirmation links are expiring too quickly.
+This happens because Supabase requires email confirmation by default, but the confirmation links are expiring too quickly or not being sent properly.
 
 ## Solution
 
@@ -24,9 +24,9 @@ This happens because Supabase requires email confirmation by default, but the co
    - Uncheck **"Enable email confirmations"**
    - Click **Save**
 
-4. **Test Registration**
-   - Try registering again
-   - Users should now be able to sign up without email confirmation
+4. **Test Registration and Login**
+   - Try registering again with `admin@gmail.com`
+   - Users should now be able to sign up and login without email confirmation
 
 ### Option 2: Configure Email Settings (For Production)
 
@@ -68,7 +68,7 @@ The code has been updated to:
 After making the Supabase settings changes:
 
 1. **Clear browser cache**
-2. **Try registering again**
+2. **Try registering again** with `admin@gmail.com`
 3. **Check browser console** for debug logs:
    ```
    🔗 API Client: Using SupabaseApiClient
@@ -85,8 +85,19 @@ Make sure your Vercel environment variables are set:
 ## Next Steps
 
 1. **Disable email confirmation** in Supabase dashboard
-2. **Test registration** with a new email
+2. **Test registration** with `admin@gmail.com`
 3. **Check that users can log in** immediately after registration
 4. **Verify data is saved** to your Supabase database
 
 The registration should now work without email confirmation delays!
+
+## Quick Fix Steps
+
+1. **Go to Supabase Dashboard** → Authentication → Settings
+2. **Find "Email Auth" section**
+3. **Uncheck "Enable email confirmations"**
+4. **Click Save**
+5. **Try registering again** with `admin@gmail.com`
+6. **Login should work immediately**
+
+This will solve the "Email not confirmed" error!
