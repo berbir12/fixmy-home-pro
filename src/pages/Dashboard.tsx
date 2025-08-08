@@ -515,14 +515,6 @@ export default function Dashboard() {
                    <Button 
                      className="w-full justify-start" 
                      variant="outline"
-                     onClick={() => navigate('/technician-registration')}
-                   >
-                     <Wrench className="w-4 h-4 mr-2" />
-                     Join as Technician
-                   </Button>
-                   <Button 
-                     className="w-full justify-start" 
-                     variant="outline"
                      onClick={() => setActiveTab('profile')}
                    >
                      <Edit className="w-4 h-4 mr-2" />
