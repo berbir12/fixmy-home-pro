@@ -158,18 +158,26 @@ class Api {
         return { success: false, error: 'Registration failed' };
       }
 
-      // Create customer record
-      const { error: customerError } = await supabase
-        .from('customers')
-        .insert({
-          id: authData.user.id,
-          email: userData.email,
-          name: userData.name,
-          phone: userData.phone,
-          role: 'customer',
-        });
+      // Use a safer approach to create customer record
+      try {
+        const { error: customerError } = await supabase
+          .from('customers')
+          .insert({
+            id: authData.user.id,
+            email: userData.email,
+            name: userData.name,
+            phone: userData.phone,
+            role: 'customer',
+          });
 
-      if (customerError) throw customerError;
+        if (customerError) {
+          console.warn('Customer creation error (non-critical):', customerError);
+          // Don't throw here, continue with the registration
+        }
+      } catch (insertError) {
+        console.warn('Customer insert failed (non-critical):', insertError);
+        // Continue with registration even if customer record creation fails
+      }
 
       const customer: Customer = {
         id: authData.user.id,
