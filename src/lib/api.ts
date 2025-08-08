@@ -235,7 +235,7 @@ class Api {
         .from('admins')
         .select('*')
         .eq('id', authUser.id)
-        .single();
+        .maybeSingle();
 
       if (admin && !adminError) {
         return { success: true, data: admin as Admin };
@@ -246,7 +246,7 @@ class Api {
         .from('customers')
         .select('*')
         .eq('id', authUser.id)
-        .single();
+        .maybeSingle();
 
       if (customer && !customerError) {
         return { success: true, data: customer as Customer };
@@ -257,7 +257,7 @@ class Api {
         .from('technicians')
         .select('*')
         .eq('id', authUser.id)
-        .single();
+        .maybeSingle();
 
       if (technician && !technicianError) {
         return { success: true, data: technician as Technician };
